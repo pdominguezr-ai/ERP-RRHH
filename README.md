@@ -1,6 +1,10 @@
-# Gestión de Recursos Humanos
+# Gestión de Recursos Humanos | ERP
 
-Sistema académico full stack para la administración integral de Recursos Humanos.
+SISTEMA PARA LA GESTIÓN DE MÓDULO DE RECURSOS HUMANOS DE UN ERP
+
+CREADO POR:
+PAUL DOMINGUEZ 9989-23-9308
+JORGE MORATAYA 9989-23-340
 
 ## Tecnologías
 
