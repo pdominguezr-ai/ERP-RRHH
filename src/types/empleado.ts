@@ -1,0 +1,3 @@
+﻿export type EstadoEmpleado = 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO';
+export interface Empleado { id: string; codigo: string; nombres: string; apellidos: string; correo: string; telefono?: string; direccion?: string; fecha_nacimiento?: string; fecha_ingreso: string; puesto: string; departamento: string; salario_base: number; estado: EstadoEmpleado; jefe_inmediato_id?: string; usuario_id?: string; created_at: string; updated_at: string; }
+export interface EmpleadoFormData { codigo: string; nombres: string; apellidos: string; correo: string; telefono?: string; direccion?: string; fecha_nacimiento?: string; fecha_ingreso: string; puesto: string; departamento: string; salario_base: number; estado: EstadoEmpleado; jefe_inmediato_id?: string; }

@@ -1,0 +1,2 @@
+﻿export interface Asistencia { id: string; empleado_id: string; fecha: string; hora_entrada?: string; hora_salida?: string; horas_trabajadas?: number; observaciones?: string; created_at: string; updated_at: string; empleado?: { nombres: string; apellidos: string; codigo: string }; }
+export interface AsistenciaFormData { empleado_id: string; fecha: string; hora_entrada?: string; hora_salida?: string; observaciones?: string; }

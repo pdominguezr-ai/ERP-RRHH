@@ -1,0 +1,3 @@
+export type EstadoEvaluacion = 'BORRADOR' | 'FINALIZADA';
+export interface EvaluacionDesempeno { id: string; empleado_id: string; evaluador_id: string; periodo: string; calificacion: number; comentarios?: string; metas_cumplidas?: string; areas_mejora?: string; estado: EstadoEvaluacion; created_at: string; updated_at: string; empleado?: { nombres: string; apellidos: string; codigo: string; departamento: string }; }
+export interface EvaluacionFormData { empleado_id: string; periodo: string; calificacion: number; comentarios?: string; metas_cumplidas?: string; areas_mejora?: string; estado: EstadoEvaluacion; }
