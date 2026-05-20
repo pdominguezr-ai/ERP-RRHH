@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   LogOut,
   ChevronRight,
+  History
 } from 'lucide-react';
 
 const navItems = [
@@ -35,6 +36,7 @@ const navItems = [
   { label: 'Beneficios',      href: '/dashboard/beneficios',     icon: Gift },
   { label: 'Reportes',        href: '/dashboard/reportes',       icon: BarChart3 },
   { label: 'Cumplimiento',    href: '/dashboard/cumplimiento',   icon: ShieldCheck },
+  { label: 'Auditoría',       href: '/dashboard/auditoria',      icon: History },
 ];
 
 export default function Sidebar() {

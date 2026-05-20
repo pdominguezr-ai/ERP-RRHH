@@ -18,11 +18,15 @@ interface DataTableProps<T> {
   loading?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
-  searchKeys?: (keyof T)[];
+  searchKeys?: (keyof T | string)[];
   pageSize?: number;
   emptyTitle?: string;
   emptyDescription?: string;
   keyExtractor: (row: T) => string;
+}
+
+function getNestedValue(obj: any, path: string): any {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
 export default function DataTable<T>({
@@ -40,11 +44,11 @@ export default function DataTable<T>({
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
 
-  // Filtrado
+  // Filtrado con soporte a campos anidados
   const filtered = searchable && query.trim()
     ? data.filter((row) =>
         searchKeys.some((key) => {
-          const val = String(row[key] ?? '').toLowerCase();
+          const val = String(getNestedValue(row, String(key)) ?? '').toLowerCase();
           return val.includes(query.toLowerCase());
         })
       )

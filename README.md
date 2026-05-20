@@ -69,6 +69,19 @@ npm run lint     # linting
 - ✅ Reportes básicos de RRHH
 - ✅ Cumplimiento Laboral
 
+## Documentación Técnica Final
+
+Todos los entregables académicos e informes de arquitectura y calidad del MVP se encuentran en la carpeta `docs/`:
+
+1.  **[DERCAS y Especificación de Requerimientos](file:///docs/DERCAS_Final.md)**: Alcance, criterios INVEST y reglas de negocio.
+2.  **[Matriz de Trazabilidad de Requerimientos (RTM)](file:///docs/RTM_Final.md)**: Mapeo de requerimientos (REQ-01 a REQ-24) a componentes lógicos y casos de prueba.
+3.  **[Casos de Uso y Narrativas de Interacción](file:///docs/CasosUso_Narrativas.md)**: Narrativas de interacción detalladas para nóminas, solicitudes y contratación.
+4.  **[Modelo de Arquitectura C4](file:///docs/Diagrama_C4.md)**: Niveles de contexto, contenedor y componente del sistema.
+5.  **[Diagramas de Secuencia](file:///docs/Diagramas_Secuencia.md)**: Flujo de llamadas de backend y transacciones.
+6.  **[Arquitectura y Patrones de Diseño](file:///docs/Arquitectura_Patrones.md)**: Service Pattern, Validation Layer y Auditoría.
+7.  **[Plan de Pruebas y QA](file:///docs/Plan_Pruebas_QA.md)**: 24 casos de prueba específicos (CP-01 a CP-24).
+8.  **[Resumen del MVP Funcional y Guía de Despliegue](file:///docs/MVP_Funcional.md)**: Guía paso a paso para instalación local.
+
 ## Orden de migraciones
 
 ```
@@ -82,11 +95,12 @@ supabase/seed.sql                            → datos de prueba
 src/
 ├── app/           → rutas (App Router)
 ├── components/    → ui / forms / tables / layout
-├── lib/           → supabaseClient, supabaseServer, auth, permissions, utils
-├── services/      → lógica de acceso a datos
+├── lib/           → supabaseClient, supabaseServer, auth, permissions, utils, validators
+├── services/      → lógica de acceso a datos (Nómina, Reclutamiento, Auditoría, etc.)
 ├── types/         → tipos TypeScript
 └── middleware.ts  → protección de rutas
 supabase/
 ├── migrations/    → esquema SQL
 └── seed.sql       → datos de prueba
+docs/              → documentación técnica del entregable final
 ```
