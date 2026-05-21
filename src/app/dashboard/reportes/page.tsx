@@ -1,9 +1,12 @@
+import { requireRole } from '@/lib/auth';
 import { getReportes } from '@/services/reporteService';
 import PageHeader from '@/components/layout/PageHeader';
 import ReportesClient from './ReportesClient';
 
 export default async function ReportesPage() {
+  await requireRole(['ADMIN_RRHH', 'JEFE_INMEDIATO']);
   const reportes = await getReportes();
+
 
   return (
     <div>

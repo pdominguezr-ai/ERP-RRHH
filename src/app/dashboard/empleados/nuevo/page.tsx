@@ -1,9 +1,12 @@
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import EmpleadoForm from '../EmpleadoForm';
 import { getEmpleados } from '@/services/empleadoService';
 
 export default async function NuevoEmpleadoPage() {
+  await requireRole(['ADMIN_RRHH', 'JEFE_INMEDIATO']);
   const empleados = await getEmpleados();
+
   const jefesPotenciales = empleados.filter((e) => e.estado === 'ACTIVO').map((e) => ({
     id: e.id,
     nombres: e.nombres,

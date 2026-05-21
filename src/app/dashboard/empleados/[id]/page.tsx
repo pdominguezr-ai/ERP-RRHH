@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import EmpleadoForm from '../EmpleadoForm';
 import { getEmpleado, getEmpleados } from '@/services/empleadoService';
@@ -8,8 +9,10 @@ interface EditEmpleadoPageProps {
 }
 
 export default async function EditEmpleadoPage({ params }: EditEmpleadoPageProps) {
+  await requireRole(['ADMIN_RRHH', 'JEFE_INMEDIATO']);
   const resolvedParams = await params;
   const empleado = await getEmpleado(resolvedParams.id).catch(() => null);
+
 
   if (!empleado) {
     notFound();

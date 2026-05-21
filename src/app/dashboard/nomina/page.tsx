@@ -1,9 +1,12 @@
+import { requireRole } from '@/lib/auth';
 import { getNominas } from '@/services/nominaService';
 import PageHeader from '@/components/layout/PageHeader';
 import NominaClient from './NominaClient';
 
 export default async function NominaPage() {
+  await requireRole(['ADMIN_RRHH']);
   const nominas = await getNominas();
+
 
   return (
     <div>

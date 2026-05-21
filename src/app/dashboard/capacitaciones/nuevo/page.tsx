@@ -1,7 +1,10 @@
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import CapacitacionForm from '../CapacitacionForm';
 
-export default function NuevaCapacitacionPage() {
+export default async function NuevaCapacitacionPage() {
+  await requireRole(['ADMIN_RRHH']);
+
   return (
     <div className="max-w-3xl mx-auto">
       <PageHeader

@@ -5,7 +5,8 @@ import DataTable, { type Column } from '@/components/tables/DataTable';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatFecha } from '@/lib/utils';
 import type { Candidato, ProcesoReclutamiento } from '@/types/reclutamiento';
-import { Users, Briefcase } from 'lucide-react';
+import { Users, Briefcase, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 interface ReclutamientoClientProps {
   initialCandidatos: Candidato[];
@@ -64,6 +65,22 @@ export default function ReclutamientoClient({ initialCandidatos, initialProcesos
         <div className="text-sm">
           <div><span className="text-gray-400 mr-1">A:</span> {formatFecha(row.fecha_apertura)}</div>
           {row.fecha_cierre && <div><span className="text-gray-400 mr-1">C:</span> {formatFecha(row.fecha_cierre)}</div>}
+        </div>
+      ),
+    },
+    {
+      key: 'acciones',
+      header: 'Acciones',
+      className: 'text-right',
+      render: (row) => (
+        <div className="flex items-center justify-end">
+          <Link
+            href={`/dashboard/reclutamiento/procesos/${row.id}`}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+            title="Gestionar Proceso"
+          >
+            <Eye className="w-4 h-4" />
+          </Link>
         </div>
       ),
     },

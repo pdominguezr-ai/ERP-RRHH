@@ -1,7 +1,10 @@
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import NominaForm from '../NominaForm';
 
-export default function NuevaNominaPage() {
+export default async function NuevaNominaPage() {
+  await requireRole(['ADMIN_RRHH']);
+
   return (
     <div className="max-w-3xl mx-auto">
       <PageHeader

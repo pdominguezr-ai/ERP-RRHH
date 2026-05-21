@@ -40,7 +40,11 @@ export default function CumplimientoForm() {
     setError('');
 
     try {
-      const res = await createCumplimiento(data as CumplimientoFormData);
+      const payload: CumplimientoFormData = {
+        ...data,
+        fecha_limite: data.fecha_limite || undefined,
+      };
+      const res = await createCumplimiento(payload);
       if (!res.success) throw new Error(res.error);
       
       router.push('/dashboard/cumplimiento');

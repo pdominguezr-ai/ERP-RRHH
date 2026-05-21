@@ -1,7 +1,10 @@
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import ProcesoForm from '../../ProcesoForm';
 
-export default function NuevoProcesoPage() {
+export default async function NuevoProcesoPage() {
+  await requireRole(['ADMIN_RRHH', 'RECLUTADOR']);
+
   return (
     <div className="max-w-4xl mx-auto">
       <PageHeader
