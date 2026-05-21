@@ -1,9 +1,12 @@
+import { requireRole } from '@/lib/auth';
 import { getEmpleados } from '@/services/empleadoService';
 import EmpleadosClient from './EmpleadosClient';
 import PageHeader from '@/components/layout/PageHeader';
 
 export default async function EmpleadosPage() {
+  await requireRole(['ADMIN_RRHH', 'JEFE_INMEDIATO']);
   const empleados = await getEmpleados();
+
 
   return (
     <div>

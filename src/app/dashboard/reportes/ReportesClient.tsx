@@ -10,7 +10,7 @@ import FormInput from '@/components/forms/FormInput';
 import FormSelect from '@/components/forms/FormSelect';
 import { formatFecha } from '@/lib/utils';
 import type { ReporteRH } from '@/types/reporte';
-import { createReporte } from './actions';
+import { createReporte, obtenerDatosReporteAction } from './actions';
 
 interface ReportesClientProps {
   initialData: ReporteRH[];
@@ -26,12 +26,52 @@ type FormData = z.infer<typeof schema>;
 export default function ReportesClient({ initialData }: ReportesClientProps) {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
     defaultValues: { tipo: 'EMPLEADOS_ACTIVOS' },
   });
+
+  const handleDownload = async (id: string, tipo: string, titulo: string) => {
+    setDownloadingId(id);
+    try {
+      const res = await obtenerDatosReporteAction(tipo as any);
+      if (!res.success || !res.headers || !res.data) {
+        throw new Error(res.error || 'No se pudieron obtener los datos de la base de datos');
+      }
+
+      // Escapar comillas dobles y comas en campos de texto para CSV
+      const escaparCSV = (val: any) => {
+        const texto = val === null || val === undefined ? '' : String(val);
+        if (texto.includes(',') || texto.includes('"') || texto.includes('\n')) {
+          return `"${texto.replace(/"/g, '""')}"`;
+        }
+        return texto;
+      };
+
+      const cabeceraCSV = res.headers.map(escaparCSV).join(',');
+      const filasCSV = res.data.map(fila => fila.map(escaparCSV).join(',')).join('\n');
+      const contenidoCSV = `${cabeceraCSV}\n${filasCSV}`;
+
+      // Crear un blob con UTF-8 BOM e iniciar descarga
+      const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), contenidoCSV], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${titulo.toLowerCase().replace(/[^a-z0-9]/g, '_')}_reporte.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error(error);
+      alert('Error al descargar el reporte: ' + error.message);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const columns: Column<ReporteRH>[] = [
     {
@@ -58,9 +98,14 @@ export default function ReportesClient({ initialData }: ReportesClientProps) {
       key: 'acciones',
       header: 'Descargar',
       className: 'text-right',
-      render: () => (
+      render: (row) => (
         <div className="flex items-center justify-end">
-          <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Descargar PDF">
+          <button 
+            onClick={() => handleDownload(row.id, row.tipo, row.titulo)}
+            disabled={downloadingId === row.id}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:opacity-50" 
+            title="Descargar CSV"
+          >
             <Download className="w-4 h-4" />
           </button>
         </div>

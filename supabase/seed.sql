@@ -39,12 +39,12 @@ ON CONFLICT DO NOTHING;
 INSERT INTO empleados (id, codigo, nombres, apellidos, correo, telefono, fecha_ingreso, puesto, departamento, salario_base, estado) VALUES
   ('b1000000-0000-0000-0000-000000000001', 'EMP-001', 'Carlos',  'García López',    'carlos.garcia@empresa.com',   '5555-1001', '2022-01-10', 'Desarrollador Senior',     'Tecnología',        18000.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000002', 'EMP-002', 'María',   'Martínez Ruiz',   'maria.martinez@empresa.com',  '5555-1002', '2021-06-15', 'Analista Contable',        'Finanzas',          15000.00, 'ACTIVO'),
-  ('b1000000-0000-0000-0000-000000000003', 'EMP-003', 'Luis',    'Pérez Sánchez',   'luis.perez@empresa.com',      '5555-1003', '2020-03-01', 'Gerente de Operaciones',   'Operaciones',       25000.00, 'ACTIVO'),
+  ('b1000000-0000-0000-0000-000000000003', 'EMP-003', 'Sol',     'López',           'sol.lopez@empresa.com',       '5555-1003', '2020-03-01', 'Gerente de Operaciones',   'Operaciones',       25000.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000004', 'EMP-004', 'Ana',     'López Torres',    'ana.lopez@empresa.com',       '5555-1004', '2023-08-20', 'Diseñadora UX',            'Tecnología',        14000.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000005', 'EMP-005', 'Roberto', 'González Díaz',   'roberto.gonzalez@empresa.com','5555-1005', '2019-11-05', 'Coordinador de Ventas',    'Ventas',            16000.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000006', 'EMP-006', 'Sandra',  'Hernández Vega',  'sandra.hernandez@empresa.com','5555-1006', '2024-01-15', 'Asistente Administrativa', 'Administración',     9500.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000007', 'EMP-007', 'Juan',    'Ramírez Castro',  'juan.ramirez@empresa.com',    '5555-1007', '2018-04-10', 'Contador General',         'Finanzas',          22000.00, 'ACTIVO'),
-  ('b1000000-0000-0000-0000-000000000008', 'EMP-008', 'Patricia','Flores Mendoza',  'patricia.flores@empresa.com', '5555-1008', '2022-09-01', 'Desarrolladora Junior',    'Tecnología',        11000.00, 'ACTIVO'),
+  ('b1000000-0000-0000-0000-000000000008', 'EMP-008', 'Patricia', 'Flores Mendoza',  'patricia.flores@empresa.com', '5555-1008', '2022-09-01', 'Desarrolladora Junior',    'Tecnología',        11000.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000009', 'EMP-009', 'Miguel',  'Torres Aguilar',  'miguel.torres@empresa.com',   '5555-1009', '2023-03-12', 'Técnico de Soporte',       'Tecnología',        10500.00, 'ACTIVO'),
   ('b1000000-0000-0000-0000-000000000010', 'EMP-010', 'Laura',   'Morales Jiménez', 'laura.morales@empresa.com',   '5555-1010', '2021-07-20', 'Ejecutiva de Ventas',      'Ventas',            13500.00, 'INACTIVO')
 ON CONFLICT (codigo) DO NOTHING;
@@ -53,10 +53,18 @@ ON CONFLICT (codigo) DO NOTHING;
 UPDATE empleados SET usuario_id = 'a1000000-0000-0000-0000-000000000004'
 WHERE codigo = 'EMP-001';
 
--- Vincular usuario jefe@rrhh.com como Jefe Inmediato de EMP-001
+-- Vincular usuario jefe@rrhh.com con EMP-003 (Sol López)
+UPDATE empleados SET usuario_id = 'a1000000-0000-0000-0000-000000000002'
+WHERE codigo = 'EMP-003';
+
+-- Vincular usuario jefe@rrhh.com en jefes_inmediatos con el empleado EMP-003
 INSERT INTO jefes_inmediatos (usuario_id, empleado_id) VALUES
   ('a1000000-0000-0000-0000-000000000002', 'b1000000-0000-0000-0000-000000000003')
 ON CONFLICT DO NOTHING;
+
+-- Vincular a Sol López como jefe inmediato de Carlos, Ana y Patricia
+UPDATE empleados SET jefe_inmediato_id = 'b1000000-0000-0000-0000-000000000003'
+WHERE codigo IN ('EMP-001', 'EMP-004', 'EMP-008');
 
 -- ── CANDIDATOS de prueba ─────────────────────────────────────
 INSERT INTO candidatos (nombres, apellidos, correo, telefono, puesto_aplicado, estado) VALUES

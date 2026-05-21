@@ -23,35 +23,36 @@ const usersToCreate = [
 ];
 
 async function setup() {
-  console.log('🚀 Iniciando creación de usuarios en Supabase Auth...');
+  console.log('🚀 Iniciando creación/sincronización de usuarios en Supabase Auth...');
+
+  // Obtener todos los usuarios de Auth primero para evitar depender de mensajes de error
+  const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+  if (listError) {
+    console.error('❌ Error al listar usuarios de Auth:', listError.message);
+    return;
+  }
 
   for (const u of usersToCreate) {
     console.log(`--- Procesando: ${u.email} ---`);
-    
-    // 1. Crear en Auth
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email: u.email,
-      password: u.password,
-      email_confirm: true
-    });
+    const existingUser = users.find(user => user.email === u.email);
 
-    if (authError) {
-      if (authError.message.includes('already registered')) {
-        console.log(`ℹ️ El usuario ${u.email} ya existe en Auth.`);
-        
-        // Obtener el ID existente para sincronizar
-        const { data: { users } } = await supabase.auth.admin.listUsers();
-        const existingUser = users.find(user => user.email === u.email);
-        
-        if (existingUser) {
-          await syncUser(existingUser.id, u.email, u.rol);
-        }
-      } else {
+    if (existingUser) {
+      console.log(`ℹ️ El usuario ${u.email} ya existe en Auth con ID: ${existingUser.id}`);
+      await syncUser(existingUser.id, u.email, u.rol);
+    } else {
+      // Crear en Auth
+      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+        email: u.email,
+        password: u.password,
+        email_confirm: true
+      });
+
+      if (authError) {
         console.error(`❌ Error al crear ${u.email}:`, authError.message);
+      } else if (authUser.user) {
+        console.log(`✅ Usuario ${u.email} creado en Auth con ID: ${authUser.user.id}`);
+        await syncUser(authUser.user.id, u.email, u.rol);
       }
-    } else if (authUser.user) {
-      console.log(`✅ Usuario ${u.email} creado en Auth con ID: ${authUser.user.id}`);
-      await syncUser(authUser.user.id, u.email, u.rol);
     }
   }
 

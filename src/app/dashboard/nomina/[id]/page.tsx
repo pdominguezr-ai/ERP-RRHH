@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatFecha } from '@/lib/utils';
@@ -43,8 +44,10 @@ async function getNominaCompleta(id: string) {
 }
 
 export default async function DetalleNominaPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireRole(['ADMIN_RRHH']);
   const resolvedParams = await params;
   const data = await getNominaCompleta(resolvedParams.id);
+
 
   if (!data) notFound();
 

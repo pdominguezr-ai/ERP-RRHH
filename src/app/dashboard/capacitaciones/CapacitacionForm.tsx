@@ -42,7 +42,11 @@ export default function CapacitacionForm() {
     setError('');
 
     try {
-      const res = await createCapacitacion(data as CapacitacionFormData);
+      const payload: CapacitacionFormData = {
+        ...data,
+        fecha_fin: data.fecha_fin || undefined,
+      };
+      const res = await createCapacitacion(payload);
       if (!res.success) throw new Error(res.error);
       
       router.push('/dashboard/capacitaciones');

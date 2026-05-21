@@ -1,7 +1,10 @@
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import BeneficioForm from '../BeneficioForm';
 
-export default function NuevoBeneficioPage() {
+export default async function NuevoBeneficioPage() {
+  await requireRole(['ADMIN_RRHH']);
+
   return (
     <div className="max-w-3xl mx-auto">
       <PageHeader

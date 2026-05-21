@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { requireRole } from '@/lib/auth';
 import PageHeader from '@/components/layout/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatFecha } from '@/lib/utils';
@@ -31,8 +32,10 @@ async function getProcesoCompleto(id: string) {
 }
 
 export default async function ProcesoDetallePage({ params }: { params: Promise<{ id: string }> }) {
+  await requireRole(['ADMIN_RRHH', 'RECLUTADOR']);
   const resolvedParams = await params;
   const data = await getProcesoCompleto(resolvedParams.id);
+
 
   if (!data) notFound();
 
