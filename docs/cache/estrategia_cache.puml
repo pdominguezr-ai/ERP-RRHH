@@ -1,0 +1,93 @@
+@startuml estrategia_cache
+!theme plain
+autonumber
+skinparam responseMessageBelowArrow true
+skinparam backgroundColor #FFFFFF
+
+title Estrategia de Caché Redis - Patrón Cache-Aside e Invalidación
+
+box "Capa de Cliente" #F3F4F6
+actor "Cliente / Web App" as Client
+end box
+
+box "Capa de Aplicación (Next.js 16)" #E0E7FF
+participant "API Backend / Service" as API
+participant "Cache Manager (Redis Client)" as CacheMgr
+end box
+
+box "Capa de Persistencia & Memoria" #DCFCE7
+database "Redis In-Memory (Cache)" as Redis
+database "PostgreSQL DB" as DB
+end box
+
+== ESCENARIO 1: LECTURA CON CACHE HIT (Baja Latencia < 5ms) ==
+
+Client -> API : GET /api/v1/empleados
+activate API
+API -> CacheMgr : get("rrhh:empleados:activos")
+activate CacheMgr
+CacheMgr -> Redis : GET "rrhh:empleados:activos"
+activate Redis
+Redis --> CacheMgr : 200 OK [JSON datos en memoria]
+deactivate Redis
+CacheMgr --> API : Retorna datos cacheados (Cache Hit)
+deactivate CacheMgr
+API --> Client : 200 OK (Respuesta ultra-rápida desde Redis)
+deactivate API
+
+== ESCENARIO 2: LECTURA CON CACHE MISS (Población Lazy con TTL) ==
+
+Client -> API : GET /api/v1/nominas/periodo/2026-09
+activate API
+API -> CacheMgr : get("rrhh:nominas:periodo:2026-09")
+activate CacheMgr
+CacheMgr -> Redis : GET "rrhh:nominas:periodo:2026-09"
+activate Redis
+Redis --> CacheMgr : nil (Cache Miss / Expirado)
+deactivate Redis
+CacheMgr --> API : null (No encontrado)
+deactivate CacheMgr
+
+API -> DB : SELECT * FROM nominas WHERE periodo_inicio >= '2026-09-01'
+activate DB
+DB --> API : Retorna registros de nómina desde disco
+deactivate DB
+
+API -> CacheMgr : set("rrhh:nominas:periodo:2026-09", data, TTL=900s)
+activate CacheMgr
+CacheMgr -> Redis : SETEX "rrhh:nominas:periodo:2026-09" 900 [JSON data]
+activate Redis
+Redis --> CacheMgr : OK
+deactivate Redis
+deactivate CacheMgr
+
+API --> Client : 200 OK (Datos servidos y almacenados en caché para próximas lecturas)
+deactivate API
+
+== ESCENARIO 3: MUTACIÓN (ESCRITURA) E INVALIDACIÓN DE CACHÉ ==
+
+Client -> API : POST /api/v1/empleados (Crear nuevo empleado)
+activate API
+API -> DB : INSERT INTO empleados (...) VALUES (...)
+activate DB
+DB --> API : Empleado insertado con éxito (Commit ACID)
+deactivate DB
+
+API -> CacheMgr : invalidateKeys(["rrhh:empleados:activos", "rrhh:dashboard:stats"])
+activate CacheMgr
+CacheMgr -> Redis : DEL "rrhh:empleados:activos" "rrhh:dashboard:stats"
+activate Redis
+Redis --> CacheMgr : 2 keys eliminadas
+deactivate Redis
+deactivate CacheMgr
+
+API --> Client : 201 Created (Empleado registrado y caché invalidado)
+deactivate API
+
+note over Redis, DB
+  <b>Garantía de Consistencia:</b>
+  La siguiente petición GET /api/v1/empleados experimentará un Cache Miss,
+  consultará PostgreSQL con los datos actualizados y repoblará Redis automáticamente.
+end note
+
+@enduml

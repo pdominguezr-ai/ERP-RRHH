@@ -1,0 +1,82 @@
+@startuml arquitectura_legado
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam packageBackgroundColor #F9FAFB
+skinparam packageBorderColor #D1D5DB
+skinparam componentStyle uml2
+
+title Arquitectura del Sistema Legado (Monolito Acoplado - gestion-rrhh)
+
+package "Cliente (Navegador Web)" {
+  [React Single Page App\n(Next.js Client Components)] as ClientUI
+}
+
+package "Servidor Monolítico Next.js 16 (Node.js Runtime)" {
+  package "Capa de Enrutamiento y Control" {
+    [Middleware de Autenticación\n(src/middleware.ts)] as Middleware
+    [Server Actions / Controladores\n(src/app/dashboard/*/actions.ts)] as ServerActions
+    [Motor de Validación Zod\n(src/lib/validators.ts)] as Validators
+  }
+
+  package "Capa de Servicios de Negocio (Acoplada)" {
+    [empleadoService.ts] as EmpService
+    [nominaService.ts] as NomService
+    [solicitudService.ts] as SolService
+    [reclutamientoService.ts] as RecService
+    [onboardingService.ts] as OnbService
+    [auditoriaService.ts] as AudService
+  }
+
+  package "Capa de Integración con Persistencia" {
+    [Cliente Supabase SSR\n(src/lib/supabaseServer.ts)] as SupabaseClient
+  }
+}
+
+package "Plataforma Externa de Datos (Supabase Cloud)" {
+  database "PostgreSQL 15+" {
+    [Tabla: empleados] as T_Emp
+    [Tabla: nominas / detalle_nomina] as T_Nom
+    [Tabla: solicitudes_ausencia] as T_Sol
+    [Tabla: candidatos / procesos] as T_Rec
+    [Tabla: onboarding] as T_Onb
+    [Tabla: auditoria_cambios] as T_Aud
+  }
+  [Supabase Auth (JWT Engine)] as SupabaseAuth
+}
+
+' Relaciones de interacción
+ClientUI --> Middleware : Peticiones HTTP / HTTPS
+Middleware --> ServerActions : Traspaso de contexto de sesión
+ServerActions --> Validators : Validación de payload
+ServerActions --> EmpService : Invocación directa
+ServerActions --> NomService : Invocación directa
+ServerActions --> SolService : Invocación directa
+ServerActions --> RecService : Invocación directa
+
+' Acoplamiento interservicios crítico (Puntos de dolor identificados)
+RecService ..> EmpService : Crea empleado al seleccionar (sin transacción)
+RecService ..> OnbService : Inicializa plan de onboarding
+RecService ..> AudService : Bitácora manual
+NomService ..> AudService : Bitácora manual
+SolService ..> AudService : Bitácora manual
+
+' Dependencia directa al SDK de Supabase (Vendor Lock-in)
+EmpService --> SupabaseClient : Consultas SQL directas (.from)
+NomService --> SupabaseClient : Consultas SQL directas (.from)
+SolService --> SupabaseClient : Consultas SQL directas (.from)
+RecService --> SupabaseClient : Consultas SQL directas (.from)
+OnbService --> SupabaseClient : Consultas SQL directas (.from)
+AudService --> SupabaseClient : Consultas SQL directas (.from)
+
+SupabaseClient --> PostgreSQL : Conexión TLS / Sentencias SQL
+Middleware --> SupabaseAuth : Validación de sesión de usuario
+
+note right of RecService
+  <b>Puntos de dolor críticos:</b>
+  1. No hay transacciones atómicas (ACID).
+  2. Acoplamiento directo a Supabase SDK.
+  3. Bucle N+1 al rechazar candidatos.
+  4. Falta de capa de repositorio abstracta.
+end note
+
+@enduml

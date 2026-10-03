@@ -1,0 +1,281 @@
+@startuml modelo_datos
+!theme plain
+skinparam linetype ortho
+skinparam roundcorner 5
+
+title Diagrama Entidad-Relación (DER) - Base de Datos ERP RRHH (PostgreSQL)
+
+entity "usuarios_sistema" as US {
+  * id : uuid <<PK>>
+  --
+  * auth_user_id : uuid <<UK>>
+  * correo : varchar(255) <<UK>>
+  * rol : varchar(30)
+  * activo : boolean
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "empleados" as EMP {
+  * id : uuid <<PK>>
+  --
+  * codigo : varchar(20) <<UK>>
+  * nombres : varchar(100)
+  * apellidos : varchar(100)
+  * correo : varchar(255) <<UK>>
+  telefono : varchar(20)
+  direccion : text
+  fecha_nacimiento : date
+  * fecha_ingreso : date
+  * puesto : varchar(100)
+  * departamento : varchar(100)
+  * salario_base : numeric(12,2)
+  * estado : varchar(20)
+  jefe_inmediato_id : uuid <<FK>>
+  usuario_id : uuid <<FK>>
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "nominas" as NOM {
+  * id : uuid <<PK>>
+  --
+  * periodo_inicio : date
+  * periodo_fin : date
+  * estado : varchar(20)
+  * total_bruto : numeric(14,2)
+  * total_deducciones : numeric(14,2)
+  * total_bonificaciones : numeric(14,2)
+  * total_neto : numeric(14,2)
+  observaciones : text
+  created_by : uuid <<FK>>
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "detalle_nomina" as DET_NOM {
+  * id : uuid <<PK>>
+  --
+  * nomina_id : uuid <<FK>>
+  * empleado_id : uuid <<FK>>
+  * salario_base : numeric(12,2)
+  * bonificaciones : numeric(12,2)
+  * deducciones : numeric(12,2)
+  * retenciones : numeric(12,2)
+  * salario_neto : numeric(12,2) <<GENERATED>>
+  observaciones : text
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "asistencias" as ASIS {
+  * id : uuid <<PK>>
+  --
+  * empleado_id : uuid <<FK>>
+  * fecha : date
+  hora_entrada : time
+  hora_salida : time
+  horas_trabajadas : numeric(5,2) <<GENERATED>>
+  observaciones : text
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "solicitudes_ausencia" as SOL {
+  * id : uuid <<PK>>
+  --
+  * empleado_id : uuid <<FK>>
+  * tipo : varchar(20)
+  * fecha_inicio : date
+  * fecha_fin : date
+  * dias_solicitados : integer <<GENERATED>>
+  * motivo : text
+  * estado : varchar(20)
+  aprobado_por : uuid <<FK>>
+  fecha_aprobacion : timestamptz
+  observaciones : text
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "candidatos" as CAND {
+  * id : uuid <<PK>>
+  --
+  * nombres : varchar(100)
+  * apellidos : varchar(100)
+  * correo : varchar(255)
+  telefono : varchar(20)
+  curriculum_url : text
+  * puesto_aplicado : varchar(100)
+  * estado : varchar(20)
+  observaciones : text
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "procesos_reclutamiento" as PROC {
+  * id : uuid <<PK>>
+  --
+  * titulo : varchar(200)
+  descripcion : text
+  * puesto : varchar(100)
+  * departamento : varchar(100)
+  * estado : varchar(20)
+  * fecha_apertura : date
+  fecha_cierre : date
+  reclutador_id : uuid <<FK>>
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "proceso_reclutamiento_candidatos" as PRC_CAND {
+  * proceso_id : uuid <<PK, FK>>
+  * candidato_id : uuid <<PK, FK>>
+  --
+  * etapa : varchar(50)
+  observaciones : text
+  * created_at : timestamptz
+}
+
+entity "onboarding" as ONB {
+  * id : uuid <<PK>>
+  --
+  * empleado_id : uuid <<FK>>
+  * fecha_inicio : date
+  fecha_fin_estimada : date
+  * estado : varchar(20)
+  responsable_id : uuid <<FK>>
+  observaciones : text
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "evaluaciones_desempeno" as EVAL {
+  * id : uuid <<PK>>
+  --
+  * empleado_id : uuid <<FK>>
+  * evaluador_id : uuid <<FK>>
+  * periodo : varchar(50)
+  * calificacion : numeric(4,2)
+  comentarios : text
+  metas_cumplidas : text
+  areas_mejora : text
+  * estado : varchar(20)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "capacitaciones" as CAP {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar(200)
+  descripcion : text
+  instructor : varchar(100)
+  * fecha_inicio : date
+  fecha_fin : date
+  * modalidad : varchar(50)
+  * estado : varchar(20)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "capacitacion_empleados" as CAP_EMP {
+  * id : uuid <<PK>>
+  --
+  * capacitacion_id : uuid <<FK>>
+  * empleado_id : uuid <<FK>>
+  * completada : boolean
+  calificacion : numeric(4,2)
+  * created_at : timestamptz
+}
+
+entity "beneficios" as BEN {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar(100)
+  descripcion : text
+  * tipo : varchar(50)
+  monto : numeric(12,2)
+  * estado : varchar(20)
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "empleado_beneficios" as EMP_BEN {
+  * id : uuid <<PK>>
+  --
+  * empleado_id : uuid <<FK>>
+  * beneficio_id : uuid <<FK>>
+  * fecha_asignacion : date
+  * activo : boolean
+  * created_at : timestamptz
+}
+
+entity "cumplimiento_laboral" as CUMP {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar(200)
+  descripcion : text
+  * categoria : varchar(100)
+  fecha_limite : date
+  * estado : varchar(20)
+  responsable_id : uuid <<FK>>
+  evidencia : text
+  observaciones : text
+  * created_at : timestamptz
+  * updated_at : timestamptz
+}
+
+entity "reportes_rh" as REP {
+  * id : uuid <<PK>>
+  --
+  * tipo : varchar(30)
+  * titulo : varchar(200)
+  parametros : jsonb
+  generado_por : uuid <<FK>>
+  * created_at : timestamptz
+}
+
+entity "auditoria_cambios" as AUD {
+  * id : uuid <<PK>>
+  --
+  * tabla : varchar(100)
+  * registro_id : uuid
+  * operacion : varchar(10)
+  datos_antes : jsonb
+  datos_despues : jsonb
+  usuario_id : uuid <<FK>>
+  * created_at : timestamptz
+}
+
+' Relaciones
+US ||--o{ EMP : "usuario_id"
+EMP ||--o{ EMP : "jefe_inmediato_id"
+
+NOM ||--|{ DET_NOM : "nomina_id"
+EMP ||--o{ DET_NOM : "empleado_id"
+
+EMP ||--o{ ASIS : "empleado_id"
+EMP ||--o{ SOL : "empleado_id"
+US ||--o{ SOL : "aprobado_por"
+
+PROC ||--o{ PRC_CAND : "proceso_id"
+CAND ||--o{ PRC_CAND : "candidato_id"
+
+EMP ||--o| ONB : "empleado_id"
+US ||--o{ ONB : "responsable_id"
+
+EMP ||--o{ EVAL : "empleado_id"
+US ||--o{ EVAL : "evaluador_id"
+
+CAP ||--o{ CAP_EMP : "capacitacion_id"
+EMP ||--o{ CAP_EMP : "empleado_id"
+
+BEN ||--o{ EMP_BEN : "beneficio_id"
+EMP ||--o{ EMP_BEN : "empleado_id"
+
+US ||--o{ CUMP : "responsable_id"
+US ||--o{ REP : "generado_por"
+US ||--o{ AUD : "usuario_id"
+
+@enduml

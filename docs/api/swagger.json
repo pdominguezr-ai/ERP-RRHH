@@ -1,0 +1,794 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Gestión de Recursos Humanos (ERP RRHH)",
+    "description": "API RESTful estandarizada para la administración integral del ciclo de vida del colaborador en el ERP de Recursos Humanos.\nExpone operaciones para gestión de colaboradores, nóminas, asistencias, solicitudes de ausencia, procesos de selección y auditoría.\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Equipo de Arquitectura de Software - Grupo XX",
+      "email": "soporte-rrhh@umg.edu.gt"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.rrhh.example.com/api/v1",
+      "description": "Servidor de Producción / Staging"
+    },
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Servidor Local de Desarrollo"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/empleados": {
+      "get": {
+        "summary": "Listar colaboradores",
+        "description": "Retorna la lista paginada y filtrada de empleados registrados en la organización.",
+        "operationId": "getEmpleados",
+        "tags": ["Empleados"],
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "description": "Filtrar por estado del empleado",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ACTIVO", "INACTIVO", "SUSPENDIDO"]
+            }
+          },
+          {
+            "name": "departamento",
+            "in": "query",
+            "description": "Filtrar por departamento funcional",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Tecnología"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Cantidad de registros por página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de empleados obtenido exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpleadoListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo colaborador",
+        "description": "Registra un nuevo empleado en el sistema generando correlativo automático de código.",
+        "operationId": "createEmpleado",
+        "tags": ["Empleados"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpleadoCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colaborador creado satisfactoriamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpleadoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/schemas/ErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/empleados/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Identificador UUID único del empleado",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Obtener detalle de empleado",
+        "description": "Retorna el expediente completo del empleado especificado.",
+        "operationId": "getEmpleadoById",
+        "tags": ["Empleados"],
+        "responses": {
+          "200": {
+            "description": "Expediente encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpleadoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "404": {
+            "$ref": "#/components/schemas/ErrorResponse404"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar información de empleado",
+        "description": "Actualiza los datos laborales, salariales o de contacto del empleado.",
+        "operationId": "updateEmpleado",
+        "tags": ["Empleados"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmpleadoUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Empleado actualizado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpleadoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/schemas/ErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "404": {
+            "$ref": "#/components/schemas/ErrorResponse404"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Desactivar colaborador (Soft Delete)",
+        "description": "Cambia el estado del colaborador a INACTIVO sin destruir integridad referencial histórica.",
+        "operationId": "deactivateEmpleado",
+        "tags": ["Empleados"],
+        "responses": {
+          "200": {
+            "description": "Empleado desactivado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmpleadoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "404": {
+            "$ref": "#/components/schemas/ErrorResponse404"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/nominas": {
+      "get": {
+        "summary": "Listar períodos de nómina",
+        "description": "Retorna el histórico de períodos de nómina generados con sus totales acumulados.",
+        "operationId": "getNominas",
+        "tags": ["Nóminas"],
+        "responses": {
+          "200": {
+            "description": "Lista de nóminas recuperada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NominaHeader"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      },
+      "post": {
+        "summary": "Aperturar nuevo período de nómina",
+        "description": "Genera la cabecera en estado BORRADOR y precarga los salarios de todos los empleados activos.",
+        "operationId": "createNomina",
+        "tags": ["Nóminas"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NominaCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Nómina aperturada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/schemas/ErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/nominas/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Identificador UUID de la nómina",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Obtener desglose de nómina",
+        "description": "Retorna la cabecera y el detalle individualizado por colaborador con percepciones y deducciones.",
+        "operationId": "getNominaById",
+        "tags": ["Nóminas"],
+        "responses": {
+          "200": {
+            "description": "Nómina completa con desglose de detalle.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "404": {
+            "$ref": "#/components/schemas/ErrorResponse404"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/nominas/{id}/procesar": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Identificador UUID de la nómina a procesar",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Procesar y consolidar nómina",
+        "description": "Valida el estado BORRADOR, recalcula totales agregados y bloquea modificaciones cambiando a PROCESADA.",
+        "operationId": "procesarNomina",
+        "tags": ["Nóminas"],
+        "responses": {
+          "200": {
+            "description": "Nómina consolidada y procesada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NominaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/schemas/ErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "404": {
+            "$ref": "#/components/schemas/ErrorResponse404"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/solicitudes-ausencia": {
+      "get": {
+        "summary": "Listar solicitudes de ausencia",
+        "description": "Retorna las solicitudes de vacaciones, permisos o enfermedad según el rol del usuario autenticado.",
+        "operationId": "getSolicitudesAusencia",
+        "tags": ["Solicitudes de Ausencia"],
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["PENDIENTE", "APROBADA", "RECHAZADA"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de solicitudes obtenido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SolicitudAusenciaResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      },
+      "post": {
+        "summary": "Registrar solicitud de ausencia",
+        "description": "Permite a un empleado solicitar vacaciones, permiso o ausencia laboral por enfermedad.",
+        "operationId": "createSolicitudAusencia",
+        "tags": ["Solicitudes de Ausencia"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudAusenciaCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud radicada en estado PENDIENTE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudAusenciaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/schemas/ErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    },
+    "/solicitudes-ausencia/{id}/estado": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Identificador UUID de la solicitud de ausencia",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Resolver solicitud (Aprobar o Rechazar)",
+        "description": "Permite a un Jefe Inmediato o Administrador de RRHH autorizar o denegar una ausencia.",
+        "operationId": "updateSolicitudEstado",
+        "tags": ["Solicitudes de Ausencia"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudEstadoUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado de solicitud actualizado correctamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SolicitudAusenciaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/schemas/ErrorResponse400"
+          },
+          "401": {
+            "$ref": "#/components/schemas/ErrorResponse401"
+          },
+          "404": {
+            "$ref": "#/components/schemas/ErrorResponse404"
+          },
+          "500": {
+            "$ref": "#/components/schemas/ErrorResponse500"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Ingrese el token JWT de sesión emitido por Supabase Auth en el formato 'Bearer <token>'."
+      }
+    },
+    "schemas": {
+      "EmpleadoCreateRequest": {
+        "type": "object",
+        "required": [
+          "nombres",
+          "apellidos",
+          "correo",
+          "fecha_ingreso",
+          "puesto",
+          "departamento",
+          "salario_base"
+        ],
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "example": "EMP-0145"
+          },
+          "nombres": {
+            "type": "string",
+            "example": "Carlos Roberto"
+          },
+          "apellidos": {
+            "type": "string",
+            "example": "Morales Gómez"
+          },
+          "correo": {
+            "type": "string",
+            "format": "email",
+            "example": "cmorales@empresa.com"
+          },
+          "telefono": {
+            "type": "string",
+            "example": "+502 5555-1234"
+          },
+          "direccion": {
+            "type": "string",
+            "example": "Zona 10, Ciudad de Guatemala"
+          },
+          "fecha_nacimiento": {
+            "type": "string",
+            "format": "date",
+            "example": "1992-05-18"
+          },
+          "fecha_ingreso": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-02-01"
+          },
+          "puesto": {
+            "type": "string",
+            "example": "Ingeniero de Software Senior"
+          },
+          "departamento": {
+            "type": "string",
+            "example": "Tecnología"
+          },
+          "salario_base": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "example": 18500
+          },
+          "estado": {
+            "type": "string",
+            "enum": ["ACTIVO", "INACTIVO", "SUSPENDIDO"],
+            "default": "ACTIVO"
+          },
+          "jefe_inmediato_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "EmpleadoUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "nombres": { "type": "string" },
+          "apellidos": { "type": "string" },
+          "telefono": { "type": "string" },
+          "direccion": { "type": "string" },
+          "puesto": { "type": "string" },
+          "departamento": { "type": "string" },
+          "salario_base": { "type": "number", "format": "double" },
+          "estado": { "type": "string", "enum": ["ACTIVO", "INACTIVO", "SUSPENDIDO"] },
+          "jefe_inmediato_id": { "type": "string", "format": "uuid", "nullable": true }
+        }
+      },
+      "EmpleadoResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "codigo": { "type": "string" },
+          "nombres": { "type": "string" },
+          "apellidos": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "telefono": { "type": "string" },
+          "direccion": { "type": "string" },
+          "fecha_nacimiento": { "type": "string", "format": "date" },
+          "fecha_ingreso": { "type": "string", "format": "date" },
+          "puesto": { "type": "string" },
+          "departamento": { "type": "string" },
+          "salario_base": { "type": "number" },
+          "estado": { "type": "string", "enum": ["ACTIVO", "INACTIVO", "SUSPENDIDO"] },
+          "jefe_inmediato_id": { "type": "string", "format": "uuid", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "EmpleadoListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmpleadoResponse" }
+          },
+          "meta": { "$ref": "#/components/schemas/PaginationMeta" }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer", "example": 1 },
+          "limit": { "type": "integer", "example": 10 },
+          "total": { "type": "integer", "example": 45 },
+          "totalPages": { "type": "integer", "example": 5 }
+        }
+      },
+      "NominaCreateRequest": {
+        "type": "object",
+        "required": ["periodo_inicio", "periodo_fin"],
+        "properties": {
+          "periodo_inicio": { "type": "string", "format": "date", "example": "2026-09-01" },
+          "periodo_fin": { "type": "string", "format": "date", "example": "2026-09-30" },
+          "observaciones": { "type": "string", "example": "Nómina ordinaria correspondiente a Septiembre 2026" }
+        }
+      },
+      "NominaHeader": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "periodo_inicio": { "type": "string", "format": "date" },
+          "periodo_fin": { "type": "string", "format": "date" },
+          "estado": { "type": "string", "enum": ["BORRADOR", "PROCESADA", "PAGADA", "ANULADA"] },
+          "total_bruto": { "type": "number" },
+          "total_deducciones": { "type": "number" },
+          "total_bonificaciones": { "type": "number" },
+          "total_neto": { "type": "number" },
+          "observaciones": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "DetalleNominaItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "empleado_id": { "type": "string", "format": "uuid" },
+          "empleado_nombre": { "type": "string", "example": "Carlos Roberto Morales Gómez" },
+          "codigo_empleado": { "type": "string", "example": "EMP-0145" },
+          "puesto": { "type": "string", "example": "Ingeniero de Software Senior" },
+          "salario_base": { "type": "number", "example": 18500 },
+          "bonificaciones": { "type": "number", "example": 250 },
+          "deducciones": { "type": "number", "example": 900 },
+          "retenciones": { "type": "number", "example": 893.55 },
+          "salario_neto": { "type": "number", "example": 16956.45 },
+          "observaciones": { "type": "string" }
+        }
+      },
+      "NominaResponse": {
+        "type": "object",
+        "properties": {
+          "header": { "$ref": "#/components/schemas/NominaHeader" },
+          "detalles": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DetalleNominaItem" }
+          }
+        }
+      },
+      "SolicitudAusenciaCreateRequest": {
+        "type": "object",
+        "required": ["empleado_id", "tipo", "fecha_inicio", "fecha_fin", "motivo"],
+        "properties": {
+          "empleado_id": { "type": "string", "format": "uuid" },
+          "tipo": { "type": "string", "enum": ["PERMISO", "VACACIONES", "ENFERMEDAD", "OTRO"] },
+          "fecha_inicio": { "type": "string", "format": "date", "example": "2026-10-05" },
+          "fecha_fin": { "type": "string", "format": "date", "example": "2026-10-10" },
+          "motivo": { "type": "string", "example": "Vacaciones semestrales programadas y acordadas con jefatura." }
+        }
+      },
+      "SolicitudEstadoUpdateRequest": {
+        "type": "object",
+        "required": ["estado"],
+        "properties": {
+          "estado": { "type": "string", "enum": ["APROBADA", "RECHAZADA"] },
+          "observaciones": { "type": "string", "example": "Aprobado según disponibilidad del equipo técnico." }
+        }
+      },
+      "SolicitudAusenciaResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "empleado_id": { "type": "string", "format": "uuid" },
+          "empleado_nombre": { "type": "string", "example": "Carlos Morales" },
+          "tipo": { "type": "string", "enum": ["PERMISO", "VACACIONES", "ENFERMEDAD", "OTRO"] },
+          "fecha_inicio": { "type": "string", "format": "date" },
+          "fecha_fin": { "type": "string", "format": "date" },
+          "dias_solicitados": { "type": "integer", "example": 6 },
+          "motivo": { "type": "string" },
+          "estado": { "type": "string", "enum": ["PENDIENTE", "APROBADA", "RECHAZADA"] },
+          "aprobado_por": { "type": "string", "format": "uuid", "nullable": true },
+          "fecha_aprobacion": { "type": "string", "format": "date-time", "nullable": true },
+          "observaciones": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ErrorBody": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "error": {
+            "type": "object",
+            "properties": {
+              "codigo": { "type": "string", "example": "ERR_VALIDATION" },
+              "mensaje": { "type": "string", "example": "Uno o más campos obligatorios no cumplen con el formato requerido." },
+              "detalles": {
+                "type": "array",
+                "items": { "type": "string" },
+                "example": ["fecha_fin debe ser igual o posterior a fecha_inicio"]
+              }
+            }
+          }
+        }
+      },
+      "ErrorResponse400": {
+        "description": "Solicitud errónea o datos de validación incorrectos.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/ErrorBody" } }
+        }
+      },
+      "ErrorResponse401": {
+        "description": "No autenticado o token JWT expirado/inválido.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/ErrorBody" } }
+        }
+      },
+      "ErrorResponse404": {
+        "description": "Recurso no encontrado en el sistema.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/ErrorBody" } }
+        }
+      },
+      "ErrorResponse500": {
+        "description": "Error interno en el servidor o motor de persistencia.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/ErrorBody" } }
+        }
+      }
+    }
+  }
+}

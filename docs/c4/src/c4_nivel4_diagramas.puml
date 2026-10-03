@@ -1,0 +1,116 @@
+@startuml c4_nivel4_diagramas
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+' ============================================================
+' SECCIÓN 1: DIAGRAMA DE CLASES DE LA ARQUITECTURA PROPUESTA
+' ============================================================
+
+package "Capa de Dominio y Servicios (src/services)" {
+  interface IEmpleadoService {
+    +getEmpleados(filtros: FiltrosEmpleadoDTO): Promise<EmpleadoResponseDTO[]>
+    +getEmpleadoById(id: string): Promise<EmpleadoResponseDTO>
+    +createEmpleado(data: EmpleadoCreateDTO): Promise<EmpleadoResponseDTO>
+    +updateEmpleado(id: string, data: EmpleadoUpdateDTO): Promise<EmpleadoResponseDTO>
+    +deactivateEmpleado(id: string): Promise<EmpleadoResponseDTO>
+  }
+
+  interface INominaService {
+    +getNominas(): Promise<NominaHeaderDTO[]>
+    +getNominaById(id: string): Promise<NominaResponseDTO>
+    +createNomina(data: NominaCreateDTO): Promise<NominaResponseDTO>
+    +procesarNomina(nominaId: string): Promise<NominaResponseDTO>
+    +recalcularTotales(nominaId: string): Promise<void>
+  }
+
+  interface ISolicitudService {
+    +getSolicitudes(filtros: FiltrosSolicitudDTO): Promise<SolicitudResponseDTO[]>
+    +createSolicitud(data: SolicitudCreateDTO): Promise<SolicitudResponseDTO>
+    +updateEstado(id: string, estado: EstadoSolicitud, obs: string): Promise<SolicitudResponseDTO>
+  }
+
+  class EmpleadoService implements IEmpleadoService {
+    -empleadoRepo: IEmpleadoRepository
+    -cacheManager: ICacheManager
+    -auditoriaService: IAuditoriaService
+  }
+
+  class NominaService implements INominaService {
+    -nominaRepo: INominaRepository
+    -empleadoRepo: IEmpleadoRepository
+    -cacheManager: ICacheManager
+    -auditoriaService: IAuditoriaService
+  }
+
+  class SolicitudService implements ISolicitudService {
+    -solicitudRepo: ISolicitudRepository
+    -cacheManager: ICacheManager
+    -auditoriaService: IAuditoriaService
+  }
+}
+
+package "Capa de Abstracción de Datos (src/repositories)" {
+  interface IEmpleadoRepository {
+    +findAll(filtros: any): Promise<EmpleadoEntity[]>
+    +findById(id: string): Promise<EmpleadoEntity | null>
+    +create(data: EmpleadoInput): Promise<EmpleadoEntity>
+    +update(id: string, data: Partial<EmpleadoInput>): Promise<EmpleadoEntity>
+    +findActivos(): Promise<EmpleadoEntity[]>
+  }
+
+  interface INominaRepository {
+    +findAll(): Promise<NominaEntity[]>
+    +findById(id: string): Promise<NominaConDetalleEntity | null>
+    +create(nomina: NominaInput, detalles: DetalleInput[]): Promise<NominaEntity>
+    +updateEstado(id: string, estado: string): Promise<NominaEntity>
+    +recalcularTotalesSQL(id: string): Promise<void>
+  }
+
+  interface ISolicitudRepository {
+    +findAll(rol: string, usuarioId: string): Promise<SolicitudEntity[]>
+    +findById(id: string): Promise<SolicitudEntity | null>
+    +create(data: SolicitudInput): Promise<SolicitudEntity>
+    +updateEstado(id: string, estado: string, aprobadoPor: string, obs: string): Promise<SolicitudEntity>
+  }
+
+  class SupabaseEmpleadoRepository implements IEmpleadoRepository {
+    -client: SupabaseClient
+  }
+
+  class SupabaseNominaRepository implements INominaRepository {
+    -client: SupabaseClient
+  }
+
+  class SupabaseSolicitudRepository implements ISolicitudRepository {
+    -client: SupabaseClient
+  }
+}
+
+package "Capa de Infraestructura de Caché" {
+  interface ICacheManager {
+    +get<T>(key: string): Promise<T | null>
+    +set(key: string, value: any, ttlSeconds: number): Promise<void>
+    +del(keys: string | string[]): Promise<void>
+    +delByPattern(pattern: string): Promise<void>
+  }
+
+  class RedisCacheManager implements ICacheManager {
+    -redisClient: Redis
+  }
+}
+
+' Relaciones
+EmpleadoService --> IEmpleadoRepository
+EmpleadoService --> ICacheManager
+NominaService --> INominaRepository
+NominaService --> IEmpleadoRepository
+NominaService --> ICacheManager
+SolicitudService --> ISolicitudRepository
+SolicitudService --> ICacheManager
+
+SupabaseEmpleadoRepository ..> IEmpleadoRepository
+SupabaseNominaRepository ..> INominaRepository
+SupabaseSolicitudRepository ..> ISolicitudRepository
+RedisCacheManager ..> ICacheManager
+
+@enduml

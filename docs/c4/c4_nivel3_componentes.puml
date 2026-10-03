@@ -1,0 +1,72 @@
+@startuml c4_nivel3_componentes
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Diagrama de Componentes (C4 Nivel 3) - Contenedor API Backend
+
+Container_Boundary(api_backend, "API Backend (Next.js 16 Node.js Application)") {
+
+  Component(authMiddleware, "Middleware de Autenticación y RBAC", "Next.js Middleware (src/middleware.ts)", "Intercepta peticiones, valida JWT Bearer y autoriza según los 4 roles (ADMIN_RRHH, JEFE_INMEDIATO, RECLUTADOR, EMPLEADO).")
+
+  package "Capa de Controladores (API REST & Server Actions)" {
+    Component(empController, "Empleados Controller", "Next.js Route Handlers", "Maneja endpoints GET, POST, PUT, DELETE /api/v1/empleados.")
+    Component(nomController, "Nómina Controller", "Next.js Route Handlers", "Maneja endpoints GET, POST /api/v1/nominas y nóminas/procesar.")
+    Component(solController, "Solicitudes Controller", "Next.js Route Handlers", "Maneja endpoints GET, POST, PATCH /api/v1/solicitudes-ausencia.")
+    Component(recController, "Reclutamiento Controller", "Next.js Route Handlers", "Maneja operaciones de candidatos, vacantes y selección.")
+  }
+
+  Component(validators, "Capa de Validación DTO", "Zod Validation Engine", "Asegura integridad de payloads de entrada antes de invocar la lógica de negocio.")
+
+  package "Capa de Servicios de Dominio (Modular)" {
+    Component(empService, "EmpleadoService", "TypeScript Service", "Reglas de negocio del expediente del empleado y cambios de estado.")
+    Component(nomService, "NominaService", "TypeScript Service", "Cálculos de deducciones, retenciones y orquestación de pagos.")
+    Component(solService, "SolicitudService", "TypeScript Service", "Flujo de aprobación y reglas de días de ausencia laboral.")
+    Component(recService, "ReclutamientoService", "TypeScript Service", "Pipeline de candidatos y selección con contratación.")
+    Component(audService, "AuditoriaService", "TypeScript Service", "Bitácora histórica de operaciones DML en tablas críticas.")
+  }
+
+  Component(cacheManager, "Cache Manager (Redis)", "Redis Client / Cache Service", "Implementa patrón Cache-Aside, claves serializadas, TTL e invalidación proactiva ante mutaciones.")
+
+  package "Capa de Repositorios (Inversión de Dependencias)" {
+    Component(iEmpRepo, "IEmpleadoRepository", "Repository Interface & Impl", "Abstracción de acceso a datos para empleados.")
+    Component(iNomRepo, "INominaRepository", "Repository Interface & Impl", "Abstracción de acceso a datos para nómina y detalle.")
+    Component(iSolRepo, "ISolicitudRepository", "Repository Interface & Impl", "Abstracción de acceso a datos para solicitudes de ausencia.")
+    Component(iAudRepo, "IAuditoriaRepository", "Repository Interface & Impl", "Persistencia de eventos de auditoría.")
+  }
+}
+
+ContainerDb(database, "PostgreSQL Database", "Supabase PostgreSQL", "Tablas relacionales y procedimientos almacenados (RPC).")
+ContainerDb(redis, "Redis Cache", "In-Memory Store", "Almacena claves 'rrhh:empleados:*', 'rrhh:nominas:*', etc.")
+
+' Flujos de llamada
+authMiddleware --> empController : Permite petición autorizada
+authMiddleware --> nomController : Permite petición autorizada
+authMiddleware --> solController : Permite petición autorizada
+authMiddleware --> recController : Permite petición autorizada
+
+empController --> validators : Valida DTO entrada
+nomController --> validators : Valida DTO entrada
+solController --> validators : Valida DTO entrada
+
+empController --> empService : Delega operación
+nomController --> nomService : Delega operación
+solController --> solService : Delega operación
+recController --> recService : Delega operación
+
+empService --> cacheManager : Consulta / Invalida caché
+nomService --> cacheManager : Consulta / Invalida caché
+cacheManager --> redis : Comandos GET, SETEX, DEL
+
+empService --> iEmpRepo : Invoca repositorio
+nomService --> iNomRepo : Invoca repositorio
+solService --> iSolRepo : Invoca repositorio
+recService --> iEmpRepo : Invoca para alta de empleado
+empService --> audService : Registra auditoría
+nomService --> audService : Registra auditoría
+audService --> iAudRepo : Persiste bitácora
+
+iEmpRepo --> database : Consultas SQL / Stored Procedures
+iNomRepo --> database : Consultas SQL / Stored Procedures
+iSolRepo --> database : Consultas SQL
+iAudRepo --> database : Consultas SQL
+
+@enduml

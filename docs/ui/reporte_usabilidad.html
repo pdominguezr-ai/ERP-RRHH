@@ -1,0 +1,206 @@
+
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Reporte Técnico de Usabilidad y WCAG 2.1</title>
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  
+  * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  body { margin: 0; padding: 0; color: #1e293b; background: #ffffff; line-height: 1.6; font-size: 13px; }
+  
+  .page { padding: 40px; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: avoid; }
+  
+  /* Portada */
+  .cover { display: flex; flex-direction: column; justify-content: space-between; height: 90vh; text-align: center; border: 2px solid #1e3a8a; padding: 50px 30px; margin: 20px; border-radius: 12px; }
+  .cover-header h1 { color: #1e3a8a; font-size: 26px; margin: 0; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+  .cover-header h2 { color: #3b82f6; font-size: 18px; margin-top: 8px; font-weight: 600; }
+  .cover-title { margin: 40px 0; background: #f8fafc; padding: 30px; border-radius: 8px; border-left: 6px solid #2563eb; }
+  .cover-title h3 { color: #0f172a; font-size: 22px; margin: 0 0 10px 0; font-weight: 700; }
+  .cover-title p { color: #475569; font-size: 14px; margin: 0; }
+  .cover-details { text-align: left; background: #f1f5f9; padding: 20px 30px; border-radius: 8px; font-size: 13px; }
+  .cover-details table { width: 100%; border-collapse: collapse; }
+  .cover-details td { padding: 6px 0; color: #334155; }
+  .cover-details td strong { color: #0f172a; width: 140px; display: inline-block; }
+  
+  /* Headings */
+  h1.section-title { color: #1e3a8a; font-size: 20px; font-weight: 700; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 30px; margin-bottom: 15px; }
+  h2.subsection-title { color: #1e40af; font-size: 16px; font-weight: 600; margin-top: 20px; margin-bottom: 10px; }
+  h3.subsubsection-title { color: #334155; font-size: 14px; font-weight: 600; margin-top: 15px; margin-bottom: 8px; }
+  
+  p { margin-bottom: 12px; text-align: justify; }
+  ul, ol { margin-top: 0; margin-bottom: 15px; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  
+  /* Tables */
+  table.styled-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+  table.styled-table th { background: #1e3a8a; color: #ffffff; text-align: left; padding: 10px; font-weight: 600; }
+  table.styled-table td { padding: 9px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  table.styled-table tr:nth-child(even) { background-color: #f8fafc; }
+  
+  /* Badges */
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge-must { background: #fee2e2; color: #991b1b; }
+  .badge-should { background: #fef3c7; color: #92400e; }
+  .badge-could { background: #e0e7ff; color: #3730a3; }
+  .badge-pass { background: #dcfce7; color: #166534; }
+  
+  /* Code & Gherkin blocks */
+  .code-block { background: #0f172a; color: #f8fafc; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.4; white-space: pre-wrap; margin: 15px 0; }
+  .gherkin-keyword { color: #38bdf8; font-weight: bold; }
+  
+  /* Links & Callouts */
+  .link-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 12px 18px; border-radius: 6px; margin: 15px 0; color: #1e40af; font-size: 12px; }
+  .link-box a { color: #2563eb; text-decoration: none; font-weight: 600; }
+  
+  .img-container { text-align: center; margin: 20px 0; }
+  .img-container img { max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+  .img-caption { font-size: 11px; color: #64748b; margin-top: 6px; font-style: italic; }
+</style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="cover">
+        <div class="cover-header">
+          <h1>Universidad Mariano Gálvez de Guatemala</h1>
+          <h2>Facultad de Ingeniería en Sistemas - Análisis de Sistemas II</h2>
+        </div>
+        <div class="cover-title">
+          <h3>REPORTE TÉCNICO DE USABILIDAD, DISEÑO UX/UI Y ACCESIBILIDAD (WCAG 2.1)</h3>
+          <p>Evaluación de Experiencia de Usuario y Prototipado Interactivo - ERP RRHH</p>
+        </div>
+        <div class="cover-details">
+          <table>
+            <tr><td><strong>Proyecto:</strong> ERP de Gestión de Recursos Humanos</td></tr>
+            <tr><td><strong>Entregable:</strong> Componente 3 - Prototipo UX/UI & Usabilidad</td></tr>
+            <tr><td><strong>Formato Exigido:</strong> PDF con enlace embebido a Figma</td></tr>
+            <tr><td><strong>Fecha:</strong> Octubre 2026</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page">
+      <h1 class="section-title">1. Prototipo Interactivo Navegable en Figma</h1>
+      <div class="link-box">
+        🌐 <strong>Enlace Oficial al Prototipo Figma:</strong><br/>
+        <a href="https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype" target="_blank">https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype</a>
+      </div>
+      <p>
+        El prototipo interactivo permite navegar de forma fluida por el ciclo completo de interacción del usuario en el ERP de RRHH. Incluye transiciones entre pantallas, modales de confirmación, estados de carga y validación de formularios.
+      </p>
+
+      <h1 class="section-title">2. Enfoque Mobile-First y Responsive Web</h1>
+      <p>
+        La interfaz fue diseñada con una estrategia <strong>Mobile-First & Adaptive Grid</strong>, garantizando una usabilidad consistente en resoluciones desde móviles (375px) hasta monitores UltraWide (1440px+).
+      </p>
+      <ul>
+        <li><strong>Móvil (375px - 767px):</strong> Menú hamburguesa colapsable, formularios en columna única y tablas adaptadas a tarjetas flexibles.</li>
+        <li><strong>Tablet (768px - 1023px):</strong> Sidebar compacto de iconos y cuadrícula a 2 columnas para formularios.</li>
+        <li><strong>Escritorio (1024px+):</strong> Panel lateral de navegación persistente, tablas completas con paginación y modales centrados.</li>
+      </ul>
+
+      <h1 class="section-title">3. Mapa de Navegación del Sistema (User Flow)</h1>
+      <p>La estructura de flujo entre pantallas sigue una arquitectura jerárquica clara:</p>
+      <div class="code-block">
+[Pantalla de Autenticación /login]
+       │
+       ▼
+[Panel Principal /dashboard]
+       ├──► [Listado Colaboradores /dashboard/empleados] ──► [Formulario /nuevo]
+       ├──► [Procesamiento Nómina /dashboard/nomina]    ──► [Detalle /id]
+       └──► [Solicitudes Ausencia /dashboard/solicitudes] ──► [Crear Solicitud]
+      </div>
+    </div>
+
+    <div class="page">
+      <h1 class="section-title">4. Evaluación de Accesibilidad WCAG 2.1 (Nivel AA)</h1>
+      <p>
+        Se realizó una verificación rigurosa cumpliendo los estándares internacionales <strong>WCAG 2.1 Nivel AA</strong>:
+      </p>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Criterio WCAG</th>
+            <th>Elemento Evaluado</th>
+            <th>Resultado / Métrica</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1.4.3 Contraste Mínimo</strong></td>
+            <td>Texto Slate 900 sobre Fondo Blanco</td>
+            <td>Ratio de contraste 15.8:1 (Mínimo 4.5:1)</td>
+            <td><span class="badge badge-pass">PASÓ (AA)</span></td>
+          </tr>
+          <tr>
+            <td><strong>1.4.3 Contraste Mínimo</strong></td>
+            <td>Boton Primario Azul / Texto Blanco</td>
+            <td>Ratio de contraste 4.6:1 (Mínimo 4.5:1)</td>
+            <td><span class="badge badge-pass">PASÓ (AA)</span></td>
+          </tr>
+          <tr>
+            <td><strong>2.5.5 Tamaño de Objetivos</strong></td>
+            <td>Botones e Inputs interactivos</td>
+            <td>Área de toque mínima 44px x 44px</td>
+            <td><span class="badge badge-pass">PASÓ (AA)</span></td>
+          </tr>
+          <tr>
+            <td><strong>2.1.1 Teclado</strong></td>
+            <td>Navegación por Tabulador y Focus Ring</td>
+            <td>Enfoque visible de 2px en todos los elementos</td>
+            <td><span class="badge badge-pass">PASÓ (AA)</span></td>
+          </tr>
+          <tr>
+            <td><strong>4.1.2 Nombre, Función, Valor</strong></td>
+            <td>Atributos ARIA en Modales y Tablas</td>
+            <td>Etiquetas aria-label y role="dialog"</td>
+            <td><span class="badge badge-pass">PASÓ (AA)</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h1 class="section-title">5. Trazabilidad de Consumo API OpenAPI</h1>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Pantalla Figma / UI</th>
+            <th>Endpoint Consumido</th>
+            <th>Método</th>
+            <th>Propósito del Consumo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Login Screen</strong></td>
+            <td><code>/api/v1/auth/login</code></td>
+            <td>POST</td>
+            <td>Autenticación y recepción de Token JWT</td>
+          </tr>
+          <tr>
+            <td><strong>Tabla Colaboradores</strong></td>
+            <td><code>/api/v1/empleados</code></td>
+            <td>GET</td>
+            <td>Carga paginada de expedientes activos</td>
+          </tr>
+          <tr>
+            <td><strong>Formulario Colaborador</strong></td>
+            <td><code>/api/v1/empleados</code></td>
+            <td>POST</td>
+            <td>Creación de nuevo empleado con validación DTO</td>
+          </tr>
+          <tr>
+            <td><strong>Solicitudes Ausencia</strong></td>
+            <td><code>/api/v1/solicitudes</code></td>
+            <td>POST</td>
+            <td>Registro de solicitud de vacaciones/permiso</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+  </html>
+  

@@ -1,0 +1,28 @@
+@startuml c4_nivel1_contexto
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Diagrama de Contexto de Sistema (C4 Nivel 1) - Sistema ERP de Gestión de Recursos Humanos
+
+Person(admin, "Administrador de RRHH", "Gestiona la nómina, empleados, compensaciones, políticas de cumplimiento y reportes generales.")
+Person(jefe, "Jefe Inmediato", "Supervisa personal a su cargo, autoriza ausencias y evalúa el desempeño de colaboradores.")
+Person(recluta, "Reclutador", "Publica vacantes, administra postulaciones de candidatos y gestiona el plan de inducción.")
+Person(empleado, "Empleado / Colaborador", "Consulta recibos de pago, marca asistencia, solicita permisos y revisa beneficios corporativos.")
+
+System(sistemaRRHH, "Sistema ERP de RRHH", "Plataforma centralizada bajo arquitectura de Monolito Modular que expone servicios API REST para la administración de personal y nóminas.")
+
+System_Ext(supabaseAuth, "Supabase Auth", "Proveedor de identidad federado que gestiona autenticación, emisión y validación de tokens JWT.")
+System_Ext(postgresql, "Base de Datos PostgreSQL", "Motor relacional principal para persistencia de empleados, nóminas, asistencias y auditoría.")
+System_Ext(redis, "Servicio de Caché Redis", "Almacenamiento en memoria volátil de baja latencia para consultas frecuentes y estadísticas.")
+System_Ext(smtp, "Servidor SMTP / Email", "Infraestructura externa para envío de notificaciones de pago, aprobación de vacaciones y bienvenida.")
+
+Rel(admin, sistemaRRHH, "Administra el sistema, procesa nóminas y gestiona personal", "HTTPS / Web Browser")
+Rel(jefe, sistemaRRHH, "Aprueba solicitudes de ausencia y califica evaluaciones", "HTTPS / Web Browser")
+Rel(recluta, sistemaRRHH, "Gestiona pipeline de selección y vinculación de personal", "HTTPS / Web Browser")
+Rel(empleado, sistemaRRHH, "Radica permisos y consulta su historial laboral", "HTTPS / Web Browser")
+
+Rel(sistemaRRHH, supabaseAuth, "Verifica credenciales y valida firmas de tokens JWT", "HTTPS / REST")
+Rel(sistemaRRHH, postgresql, "Persiste entidades de negocio y ejecuta procedimientos atómicos", "TCP / TLS (Puerto 5432)")
+Rel(sistemaRRHH, redis, "Lee y escribe claves de caché (Cache-Aside con TTL)", "TCP (Puerto 6379)")
+Rel(sistemaRRHH, smtp, "Despacha correos electrónicos transaccionales a usuarios", "SMTP / TLS (Puerto 587)")
+
+@enduml

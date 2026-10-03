@@ -1,0 +1,26 @@
+@startuml c4_nivel2_contenedores
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Diagrama de Contenedores (C4 Nivel 2) - Sistema ERP de Gestión de Recursos Humanos
+
+Person(usuario, "Usuario del Sistema", "Administrador RRHH, Jefe, Reclutador o Empleado según rol asignado.")
+
+System_Boundary(c1, "Sistema ERP de Recursos Humanos (Monolito Modular)") {
+  Container(spa, "Aplicación Web Frontend (SPA)", "React 19, TypeScript, Tailwind CSS, Lucide", "Interfaz gráfica responsiva que provee vistas dinámicas de formularios, dashboards, tablas y navegación.")
+  Container(backend, "API Backend / Servidor de Aplicación", "Next.js 16 App Router, Node.js Runtime", "Expone el contrato API REST v1.0, gestiona controladores, lógica de dominio modular, validación Zod e invalidación de caché.")
+}
+
+System_Ext(authService, "Supabase Auth Service", "Servicio Identity / BaaS", "Valida inicios de sesión y emite tokens JWT firmados.")
+ContainerDb(database, "Base de Datos Relacional", "PostgreSQL 15+ (Supabase Cloud)", "Almacena 21 tablas normalizadas con RLS, constraints, triggers de auditoría y stored procedures para atomicidad.")
+ContainerDb(cache, "Caché en Memoria", "Redis 7.x (In-Memory K/V)", "Acelera lecturas repetitivas de catálogos, empleados activos, nóminas y métricas de dashboard mediante Cache-Aside.")
+System_Ext(mailServer, "Servidor SMTP", "Servicio de Correo Externo", "Envío asíncrono de comprobantes de pago y avisos de solicitudes.")
+
+Rel(usuario, spa, "Interactúa mediante navegador web", "HTTPS")
+Rel(spa, backend, "Envía peticiones API REST y Server Actions con encabezado Bearer JWT", "JSON / HTTPS")
+
+Rel(backend, authService, "Verifica firma y vigencia de tokens de sesión", "HTTPS / REST")
+Rel(backend, cache, "Consulta datos en caché o almacena con TTL (Cache-Aside)", "TCP (Puerto 6379)")
+Rel(backend, database, "Ejecuta queries SQL relacionales y procedimientos RPC atómicos", "TCP / TLS (Puerto 5432)")
+Rel(backend, mailServer, "Envía alertas y notificaciones por correo", "SMTP (Puerto 587)")
+
+@enduml
