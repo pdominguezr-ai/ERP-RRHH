@@ -1,170 +1,143 @@
-# Product Backlog Priorizado y Requerimientos Ágiles
-**Sistema ERP de Gestión de Recursos Humanos (ERP-RRHH)**  
-**Universidad Mariano Gálvez | Análisis de Sistemas II**
+# Gestión Ágil de Proyectos, Product Backlog (3C + INVEST) y Criterios DoR / DoD
+**Sistema ERP de Gestión de Recursos Humanos y Recursos Corporativos (ERP-RRHH)**  
+**Universidad Mariano Gálvez de Guatemala | Curso: Análisis de Sistemas II**  
+**Integrantes:** Paul Dominguez (9989-23-9308) · Jorge Morataya (9989-23-340)
 
 ---
 
-## 🔗 Enlace Público al Tablero Ágil Activo
-> **Tablero en GitHub Projects / Jira:**  
-> 🌐 [Abrir Tablero Ágil de Requerimientos - ERP RRHH](https://github.com/users/pdominguezr-ai/projects/1/views/1)  
-> *Sincronización en tiempo real de Épicas, User Stories, Sprints y Criterios de Aceptación BDD.*
+## 🔗 Enlace Oficial al Tablero Ágil (GitHub Projects / Jira)
+> 🌐 **Tablero Kanban / Scrum Activo:** [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1)  
+> *Contiene las columnas Backlog, Ready (DoR Cumplido), In Progress (WIP Limit = 3), Code Review / QA y Done (DoD Cumplido).*
 
 ---
 
-## 🏛️ 1. Estructura Jerárquica: Épicas y Alcance MVP
+## 1. Marco de Trabajo Híbrido (Scrum + Kanban) y Rol del Analista / Product Owner
 
-El dominio de negocio se ha estructurado en 6 Épicas principales, demarcando claramente los módulos incluidos en el **Mínimo Producto Viable (MVP)**:
+### 1.1 Definición del Rol del Analista de Sistemas / Product Owner (PO)
+En el desarrollo del sistema **ERP-RRHH**, el **Analista Funcional / Product Owner** actúa como el único punto de autoridad sobre el *Product Backlog* y como puente estratégico entre los interesados del negocio (Dirección de Recursos Humanos, Jefaturas de Departamento, Contabilidad/Nómina) y el Equipo de Desarrollo. Sus responsabilidades formales son:
 
-```mermaid
-flowchart TD
-    EPIC01["Épica 1: Autenticación y Seguridad RLS (MVP)"]
-    EPIC02["Épica 2: Gestión de Expedientes de Colaboradores (MVP)"]
-    EPIC03["Épica 3: Procesamiento de Nómina Transaccional (MVP)"]
-    EPIC04["Épica 4: Solicitudes de Ausencia e Incapacidades (MVP)"]
-    EPIC05["Épica 5: Reclutamiento y Contratación Automatizada (Fase 2)"]
-    EPIC06["Épica 6: Auditoría y Cumplimiento Normativo (Fase 2)"]
-
-    subgraph MVP ["Alcance Mínimo Producto Viable (MVP)"]
-        EPIC01
-        EPIC02
-        EPIC03
-        EPIC04
-    end
-```
-
-### Detalle de Épicas:
-1. **EPIC-01: Autenticación y Control de Acceso Granular (MVP)**  
-   Módulo de control de identidades, autenticación mediante JWT/Supabase Auth y permisos por rol (Administrador, Jefe Inmediato, Empleado).
-2. **EPIC-02: Gestión Centralizada de Colaboradores (MVP)**  
-   Creación, edición y consulta de expedientes digitales de personal, asignación de salarios, puestos y departamentos.
-3. **EPIC-03: Procesamiento y Cálculo de Nómina (MVP)**  
-   Cálculo automático de salarios devengados, bonificaciones de ley (Bonificación Incentivo Q250.00), retenciones de seguridad social (IGSS 4.83%) e ISR.
-4. **EPIC-04: Solicitudes de Ausencia y Permisos (MVP)**  
-   Flujo interactivo para gestión de vacaciones, licencias médicas y permisos personales con aprobación de jefatura.
-5. **EPIC-05: Reclutamiento y Selección de Personal (Fase 2)**  
-   Gestión de vacantes, candidatos, entrevistas y promoción automática de candidato a empleado activo.
-6. **EPIC-06: Bitácora de Auditoría y Métricas (Fase 2)**  
-   Trazabilidad completa de operaciones de mutación de datos (INSERT, UPDATE, DELETE) con estados antes/después.
+1. **Maximización del Valor del Producto:** Priorizar los elementos del Product Backlog utilizando la matriz **MoSCoW** y el índice económico **WSJF (Weighted Shortest Job First)** para entregar primero los módulos críticos del MVP.
+2. **Ingeniería de Requerimientos Híbrida (ISO 29148 ↔ Agilidad):** Traducir las especificaciones formales del estándar **ISO/IEC/IEEE 29148:2018** (`REQ-FN-001` a `REQ-FN-015`) en Historias de Usuario accionables bajo el modelo de las **3C (Card, Conversation, Confirmation)**.
+3. **Aseguramiento de Calidad Temprana (Shift-Left & INVEST):** Auditar cada Historia de Usuario mediante la matriz **INVEST** antes de permitir su ingreso al Sprint Planning (verificación del **Definition of Ready - DoR**).
+4. **Co-creación de Especificaciones Ejecutables (BDD):** Redactar junto con QA y Desarrollo los criterios de aceptación en sintaxis **Gherkin (`Dado / Cuando / Entonces`)** conforme a **ISO/IEC/IEEE 29119-3:2021** y validar los entregables al cierre del Sprint según el **Definition of Done (DoD)**.
 
 ---
 
-## 📋 2. Desglose de Historias de Usuario (User Stories)
+## 2. Definición Explícita de DoR (Definition of Ready) y DoD (Definition of Done)
 
-### 🔴 Épica 1: Autenticación y Control de Acceso (MVP)
+### 2.1 Criterios de Preparación — Definition of Ready (DoR)
+Ninguna Historia de Usuario puede ingresar a un Sprint de desarrollo si no cumple **el 100%** de la siguiente lista de chequeo:
+- [x] **DoR-01 (Estructura 3C Completa):** La historia posee su Tarjeta (*Card*) en sintaxis `Como <rol>, quiero <acción>, para <beneficio>`, notas de *Conversation* (reglas de negocio e impactos en persistencia políglota) y *Confirmation* (escenarios Gherkin).
+- [x] **DoR-02 (Validación INVEST):** La historia ha sido evaluada y aprobada en los 6 criterios: *Independent, Negotiable, Valuable, Estimable, Small (≤ 8 Story Points), Testable*.
+- [x] **DoR-03 (Contrato API-First Definido):** Los endpoints afectados están documentados previamente en `docs/api/openapi.yaml` con sus esquemas de entrada/salida y errores bajo **RFC 9457 (`application/problem+json`)**.
+- [x] **DoR-04 (Diseño UX/UI Disponible):** Los wireframes o componentes visuales (Átomos, Moléculas, Organismos) están disponibles en el prototipo navegable de Figma con criterios WCAG 2.2 AA.
+- [x] **DoR-05 (Trazabilidad ISO 29148):** La historia está vinculada formalmente a su requerimiento funcional (`REQ-FN-XXX`) y no funcional (`REQ-NF-XXX`).
 
-#### **HU-01: Inicio de Sesión Institucional**
-* **Enunciado:** Como *Usuario del Sistema*, quiero *autenticarme con mi correo y contraseña* para *acceder a mis funciones autorizadas en la plataforma*.
-* **Prioridad:** Alta (Must Have)
-* **Estimación:** 3 Story Points (Fibonacci)
-* **Criterios de Aceptación:**
-  1. Validar correo institucional activo y contraseña encriptada (Bcrypt / Argon2).
-  2. Emitir JWT con claims de rol (`admin`, `jefe`, `empleado`).
-  3. Redirigir a `/dashboard` en caso de éxito; responder HTTP 401 si falla.
-* **Reglas de Negocio (RN):**
-  * **RN-01.1:** Bloqueo de cuenta tras 3 intentos fallidos por 15 minutos.
-  * **RN-01.2:** Tiempo de expiración del token JWT: 60 minutos.
-
-#### **HU-02: Control de Acceso por Roles (RBAC)**
-* **Enunciado:** Como *Administrador de RRHH*, quiero *restringir vistas y endpoints según el rol del usuario* para *proteger la confidencialidad de la información de nómina y salarios*.
-* **Prioridad:** Alta (Must Have)
-* **Estimación:** 5 Story Points
-* **Criterios de Aceptación:**
-  1. Los empleados de rol `empleado` únicamente pueden ver su propio expediente y crear solicitudes personales.
-  2. Los usuarios de rol `jefe` pueden aprobar solicitudes de su equipo.
-  3. Los usuarios de rol `admin` tienen acceso completo.
-* **Reglas de Negocio (RN):**
-  * **RN-02.1:** Aplicación estricta de Row Level Security (RLS) en la base de datos PostgreSQL.
+### 2.2 Criterios de Terminación — Definition of Done (DoD)
+Una Historia de Usuario se declara como **Terminada (Done)** únicamente cuando satisface todos los puntos siguientes:
+- [x] **DoD-01 (Código Limpio y Estándares):** El código fuente en `src/` compila sin errores de TypeScript (`tsc --noEmit`) ni advertencias críticas de ESLint, aplicando los patrones GoF pertinentes (*Repository, Strategy, Observer, Gateway, Circuit Breaker*).
+- [x] **DoD-02 (Cumplimiento de Contrato OpenAPI y RFC 9457):** El endpoint responde con los códigos semánticos **RFC 9110** (`200`, `201`, `400`, `401`, `404`, `500`) y formatea cualquier excepción en estructura **RFC 9457 (`application/problem+json`)**.
+- [x] **DoD-03 (Persistencia Políglota y Caché Operativa):** Las operaciones persisten correctamente en PostgreSQL (ACID), sincronizan eventos hacia MongoDB/Neo4j y aplican invalidación o lectura **Cache-Aside con TTL** en Redis.
+- [x] **DoD-04 (Pruebas Automatizadas Aprobadas):** El 100% de las pruebas unitarias (`tests/unit/`), pruebas de integración (`tests/integration/`), colección Postman (`docs/api/postman_collection.json`) y escenarios BDD (`features/*.feature`) pasan en estado `PASS`.
+- [x] **DoD-05 (Accesibilidad y Responsividad Verificadas):** La interfaz cumple nivel **AA de WCAG 2.2** (contraste ≥ 4.5:1, navegación por teclado) y diseño **Mobile-First**.
 
 ---
 
-### 🔵 Épica 2: Gestión de Colaboradores (MVP)
+## 3. Product Backlog Estructurado según las 3C (Card, Conversation, Confirmation)
 
-#### **HU-03: Registro de Nuevo Colaborador (Endpoint POST)**
-* **Enunciado:** Como *Gestor de Recursos Humanos*, quiero *registrar un nuevo empleado con sus datos laborales y personales* para *incorporarlo formalmente a la planilla de la empresa*.
-* **Prioridad:** Alta (Must Have)
-* **Estimación:** 5 Story Points
-* **Criterios de Aceptación:**
-  1. Formulario web responsive validado en cliente y servidor (Zod).
-  2. Generación automática del código correlativo `EMP-XXXX`.
-  3. Almacenamiento en tabla `empleados` retornando HTTP 201 Created.
-* **Reglas de Negocio (RN):**
-  * **RN-03.1:** DPI obligatorio de 13 dígitos numéricos sin duplicados.
-  * **RN-03.2:** Salario base debe ser mayor o igual al salario mínimo legal de Guatemala (Q 3,384.59).
-  * **RN-03.3:** El correo electrónico institucional debe ser único.
-
-#### **HU-04: Consulta y Filtrado Paginado de Colaboradores (Endpoint GET)**
-* **Enunciado:** Como *Gestor de Recursos Humanos*, quiero *consultar el listado paginado de empleados filtrando por departamento y estado* para *gestionar el expediente del personal de forma ágil*.
-* **Prioridad:** Alta (Must Have)
-* **Estimación:** 3 Story Points
-* **Criterios de Aceptación:**
-  1. Endpoint `GET /api/v1/empleados` soporta parámetros de consulta `estado`, `departamento`, `page` y `limit`.
-  2. Retorna estructura JSON estandarizada con metadata de paginación (`total`, `page`, `totalPages`).
-  3. Rendimiento de consulta inferior a 200 ms.
-* **Reglas de Negocio (RN):**
-  * **RN-04.1:** Límite máximo de registros por página: 100 elementos.
+### 🟦 HU-01: Autenticación Institucional y Emisión de Token JWT
+* **Requerimientos Vinculados:** `REQ-FN-001`, `REQ-NF-001`
+* **1. Card (Tarjeta):**
+  * **Enunciado:** *Como* Usuario del Sistema (Administrador RRHH, Jefe Inmediato o Colaborador), *quiero* autenticarme mediante correo electrónico institucional y contraseña segura, *para* obtener un token JWT firmado que me permita consumir los servicios protegidos según mi rol RBAC.
+  * **Prioridad MoSCoW:** Must Have (Alta) | **Estimación:** 3 Story Points | **WSJF:** 20.0
+* **2. Conversation (Conversación y Reglas de Negocio):**
+  * **RN-01.1:** El endpoint `POST /api/v1/auth/login` valida el formato de credenciales con Zod antes de consultar PostgreSQL (`usuarios_sistema`).
+  * **RN-01.2:** El token JWT tiene un tiempo de vida (`TTL`) de 3,600 segundos (60 minutos) registrado en Redis para soporte de revocación rápida (*Token Blacklist*).
+  * **RN-01.3:** Si las credenciales son inválidas o el usuario está inactivo, el sistema retorna un error **RFC 9457 (`application/problem+json`)** con estado HTTP `401 Unauthorized` o `403 Forbidden`, registrando el evento de seguridad en la colección `auditoria_eventos` de MongoDB.
+* **3. Confirmation (Confirmación / Criterios de Aceptación BDD):**
+  * **CA-01.1 (Camino Feliz):** Dado un usuario activo con credenciales válidas (`admin.rrhh@empresa.com`), cuando envía `POST /api/v1/auth/login`, entonces recibe `HTTP 200 OK`, token JWT y perfil RBAC en menos de 200 ms.
+  * **CA-01.2 (Excepción Credenciales):** Dado un password incorrecto, cuando solicita login, entonces recibe `HTTP 401` con `Content-Type: application/problem+json` y `type: "https://erp-rrhh.umg.edu.gt/probs/unauthorized"`.
+  * **CA-01.3 (Validación Esquema):** Dado un correo malformado, cuando solicita login, entonces recibe `HTTP 400` con el desglose de campos inválidos en `errors`.
 
 ---
 
-### 🟢 Épica 3: Procesamiento de Nómina (MVP)
-
-#### **HU-05: Generación y Cálculo Automático de Planilla**
-* **Enunciado:** Como *Encargado de Nómina*, quiero *generar la planilla mensual para los empleados activos* para *calcular salarios devengados, bonificaciones y deducciones de ley*.
-* **Prioridad:** Alta (Must Have)
-* **Estimación:** 8 Story Points
-* **Criterios de Aceptación:**
-  1. Generar registros en estado `BORRADOR` para todos los colaboradores activos.
-  2. Calcular automáticamente IGSS laboral (4.83%) e IGSS patronal (12.67%).
-  3. Adicionar Bonificación Incentivo Decreto 37-2001 (Q 250.00).
-* **Reglas de Negocio (RN):**
-  * **RN-05.1:** No se puede procesar la nómina si el salario neto resultante es negativo o cero.
-  * **RN-05.2:** Una vez la nómina cambia a estado `PROCESADA`, queda congelada e irrevocable.
-
----
-
-### 🟡 Épica 4: Solicitudes de Ausencia y Permisos (MVP)
-
-#### **HU-06: Registro de Solicitud de Ausencia (Endpoint POST)**
-* **Enunciado:** Como *Empleado*, quiero *solicitar días de vacaciones o permisos por enfermedad* para *obtener la autorización previa de mi jefatura*.
-* **Prioridad:** Media (Should Have)
-* **Estimación:** 3 Story Points
-* **Criterios de Aceptación:**
-  1. Formulario interactivo con selector de tipo de ausencia y calendario de fechas.
-  2. Creación del registro en estado `PENDIENTE`.
-* **Reglas de Negocio (RN):**
-  * **RN-06.1:** Fecha inicio no puede ser anterior al día actual.
-  * **RN-06.2:** La cantidad de días de vacaciones no puede superar el saldo disponible del empleado.
-
-#### **HU-07: Aprobación / Rechazo de Solicitud por Jefatura**
-* **Enunciado:** Como *Jefe Inmediato*, quiero *aprobar o rechazar las solicitudes de mi equipo* para *coordinar la disponibilidad del personal*.
-* **Prioridad:** Media (Should Have)
-* **Estimación:** 3 Story Points
-* **Criterios de Aceptación:**
-  1. Modal interactivo con opción de aprobar o rechazar.
-  2. Si se rechaza, el campo "motivo de rechazo" es obligatorio.
-* **Reglas de Negocio (RN):**
-  * **RN-07.1:** Al aprobar vacaciones, se descuentan automáticamente los días del saldo acumulado.
+### 🟦 HU-02: Consulta de Catálogo de Recursos y Colaboradores con Caché (Cache-Aside)
+* **Requerimientos Vinculados:** `REQ-FN-002`, `REQ-FN-003`, `REQ-NF-002`
+* **1. Card (Tarjeta):**
+  * **Enunciado:** *Como* Gestor de Recursos Humanos, *quiero* consultar y filtrar el catálogo de recursos y colaboradores activos por departamento, categoría y estado utilizando caché en memoria, *para* obtener tiempos de respuesta sub-milisegundo sin saturar la base de datos relacional.
+  * **Prioridad MoSCoW:** Must Have (Alta) | **Estimación:** 5 Story Points | **WSJF:** 18.5
+* **2. Conversation (Conversación y Reglas de Negocio):**
+  * **RN-02.1:** Los endpoints `GET /api/v1/recursos` y `GET /api/v1/empleados` implementan el patrón **Cache-Aside** sobre Redis con una política de expiración **`TTL = 300 segundos`**.
+  * **RN-02.2:** En caso de *Cache MISS*, el servicio consulta PostgreSQL (datos transaccionales) y enriquece el resultado con el expediente documental almacenado en MongoDB (`expedientes_digitales`), guardando el resultado serializado en Redis e incluyendo la cabecera `X-Cache: MISS`.
+  * **RN-02.3:** En lecturas subsecuentes dentro de la ventana TTL, Redis responde directamente con cabecera `X-Cache: HIT` y latencia `< 15 ms`.
+* **3. Confirmation (Confirmación / Criterios de Aceptación BDD):**
+  * **CA-02.1 (Cache MISS Inicial):** Dada una clave no existente en Redis, cuando se invoca `GET /api/v1/recursos?departamento=Tecnología`, entonces retorna `HTTP 200 OK`, cabecera `X-Cache: MISS` y almacena la clave con `TTL = 300s`.
+  * **CA-02.2 (Cache HIT Subsecuente):** Dada una clave vigente en Redis, cuando se repite la petición `GET /api/v1/recursos?departamento=Tecnología`, entonces retorna `HTTP 200 OK` y cabecera `X-Cache: HIT`.
 
 ---
 
-## 📊 3. Matriz Consolidada de Estimación y Priorización (MoSCoW / WSJF)
-
-| ID | Historia de Usuario | Épica Relacionada | Prioridad MoSCoW | Score WSJF | Story Points (Fibonacci) |
-|---|---|---|---|---|---|
-| **HU-01** | Autenticación de Usuario JWT | Épica 1: Autenticación | **Must Have** | 20.0 | **3** |
-| **HU-02** | Control de Acceso por Roles (RBAC) | Épica 1: Autenticación | **Must Have** | 18.5 | **5** |
-| **HU-03** | Crear Colaborador (`POST /empleados`) | Épica 2: Empleados | **Must Have** | 16.0 | **5** |
-| **HU-04** | Listar Colaboradores (`GET /empleados`) | Épica 2: Empleados | **Must Have** | 15.0 | **3** |
-| **HU-05** | Cálculo Automático de Nómina | Épica 3: Nómina | **Must Have** | 14.5 | **8** |
-| **HU-06** | Crear Solicitud Ausencia (`POST /solicitudes`) | Épica 4: Solicitudes | **Should Have** | 11.0 | **3** |
-| **HU-07** | Aprobación / Rechazo Solicitudes | Épica 4: Solicitudes | **Should Have** | 10.0 | **3** |
-| **HU-08** | Bitácora de Auditoría de Mutaciones | Épica 6: Auditoría | **Could Have** | 7.5 | **5** |
-| **HU-09** | Reclutamiento y Promoción Candidato | Épica 5: Reclutamiento | **Could Have** | 6.0 | **8** |
+### 🟦 HU-03: Registro Políglota de Nuevo Recurso / Colaborador con Consistencia Eventual
+* **Requerimientos Vinculados:** `REQ-FN-004`, `REQ-FN-005`, `REQ-NF-003`
+* **1. Card (Tarjeta):**
+  * **Enunciado:** *Como* Administrador de RRHH, *quiero* registrar un nuevo colaborador o recurso corporativo validando sus reglas salariales y jerárquicas, *para* persistir su ficha transaccional en PostgreSQL, su nodo jerárquico en Neo4j y su expediente en MongoDB.
+  * **Prioridad MoSCoW:** Must Have (Alta) | **Estimación:** 5 Story Points | **WSJF:** 16.0
+* **2. Conversation (Conversación y Reglas de Negocio):**
+  * **RN-03.1:** Los endpoints `POST /api/v1/recursos` y `POST /api/v1/empleados` exigen un DPI de 13 dígitos únicos y un salario base mayor o igual al mínimo legal vigente (**Q 3,384.59**).
+  * **RN-03.2:** Tras el `COMMIT` en PostgreSQL, el `DomainEventBus` (Patrón **Observer**) propaga asíncronamente la creación del nodo `(:Empleado)-[:PERTENECE_A]->(:Departamento)` en **Neo4j**, inserta la auditoría en **MongoDB** e invalida las claves de listado en **Redis**.
+* **3. Confirmation (Confirmación / Criterios de Aceptación BDD):**
+  * **CA-03.1 (Registro Exitoso):** Dados datos válidos con salario `Q 15,000.00`, cuando se envía `POST /api/v1/recursos`, entonces retorna `HTTP 201 Created`, genera código correlativo `REC-XXXX` / `EMP-XXXX`, sincroniza Neo4j/MongoDB e invalida la caché Redis.
+  * **CA-03.2 (Rechazo RFC 9457):** Dado un salario inferior a `Q 3,384.59` o DPI inválido, cuando se envía `POST /api/v1/recursos`, entonces retorna `HTTP 400 Bad Request` con estructura RFC 9457 `application/problem+json`.
 
 ---
 
-## ⚖️ 4. Listado Explícito de Reglas de Negocio Generales del Sistema
+### 🟦 HU-04: Consulta de Detalle de Recurso por ID con Resiliencia (Circuit Breaker)
+* **Requerimientos Vinculados:** `REQ-FN-006`, `REQ-NF-004`
+* **1. Card (Tarjeta):**
+  * **Enunciado:** *Como* Jefe Inmediato o Analista de RRHH, *quiero* consultar el expediente integral de un recurso o colaborador por su identificador único (`GET /api/v1/recursos/:id`), *para* visualizar sus datos contractuales (PostgreSQL), competencias (MongoDB) y línea de mando (Neo4j).
+  * **Prioridad MoSCoW:** Must Have (Alta) | **Estimación:** 3 Story Points | **WSJF:** 15.0
+* **2. Conversation (Conversación y Reglas de Negocio):**
+  * **RN-04.1:** Consulta protegida mediante **Cache-Aside** (`TTL = 600s` por ID) y patrón **Circuit Breaker** (umbral de 3 fallos consecutivos antes de pasar a estado `OPEN`).
+  * **RN-04.2:** Si el ID solicitado no existe, retorna `HTTP 404 Not Found` bajo el estándar **RFC 9457 (`application/problem+json`)**.
+* **3. Confirmation (Confirmación / Criterios de Aceptación BDD):**
+  * **CA-04.1 (Recurso Encontrado):** Dado que existe el recurso con ID `EMP-001`, cuando se consulta `GET /api/v1/recursos/EMP-001`, entonces retorna `HTTP 200 OK` con datos consolidados de PostgreSQL, MongoDB y Neo4j.
+  * **CA-04.2 (Recurso Inexistente):** Dado un ID inexistente `EMP-9999`, cuando se consulta `GET /api/v1/recursos/EMP-9999`, entonces retorna `HTTP 404 Not Found` con formato `application/problem+json`.
 
-1. **RN-GEN-01 (Identidad Única):** Ningún colaborador puede ser registrado con un correo o DPI preexistente en la base de datos.
-2. **RN-GEN-02 (Integridad Salarial):** Todas las operaciones financieras de planilla se ejecutan con precisión decimal de 2 dígitos y redondeo bancario (HALF_EVEN).
-3. **RN-GEN-03 (Immutabilidad de Auditoría):** Toda modificación en las tablas `empleados`, `nominas` y `solicitudes_ausencia` genera un registro automático e inalterable en la bitácora `auditoria_logs`.
-4. **RN-GEN-04 (Estado de Colaboradores):** Un empleado inactivo o suspendido no puede recibir pagos de nómina ni generar nuevas solicitudes de vacaciones.
+---
+
+### 🟦 HU-05: Cálculo Polimórfico de Nómina Mensual (Patrón Strategy)
+* **Requerimientos Vinculados:** `REQ-FN-007`, `REQ-FN-008`
+* **1. Card (Tarjeta):**
+  * **Enunciado:** *Como* Encargado de Nómina, *quiero* procesar la planilla aplicando dinámicamente la estrategia de cálculo según el régimen contractual de cada colaborador, *para* determinar con exactitud el IGSS (4.83%), ISR, Bonificación Decreto 37-2001 (Q 250.00) y salario líquido.
+  * **Prioridad MoSCoW:** Must Have (Alta) | **Estimación:** 8 Story Points | **WSJF:** 14.5
+* **2. Conversation (Conversación y Reglas de Negocio):**
+  * **RN-05.1:** Aplicación del patrón GoF **Strategy** (`RegimenAsalariadoStrategy`, `RegimenServiciosStrategy`, `RegimenEjecutivoStrategy`).
+  * **RN-05.2:** Integración con bancos y portal IGSS mediante el patrón **Gateway** (`ExternalErpGateway`).
+* **3. Confirmation (Confirmación / Criterios de Aceptación BDD):**
+  * **CA-05.1:** Dado un empleado en régimen asalariado con sueldo base `Q 10,000.00`, cuando se calcula su nómina, entonces el IGSS retenido es `Q 483.00`, la bonificación es `Q 250.00` y el cálculo se audita en MongoDB.
+
+---
+
+### 🟦 HU-06: Gestión y Aprobación de Solicitudes de Ausencia
+* **Requerimientos Vinculados:** `REQ-FN-009`, `REQ-FN-010`
+* **1. Card (Tarjeta):**
+  * **Enunciado:** *Como* Colaborador, *quiero* registrar solicitudes de vacaciones o permisos verificando mi saldo disponible y jerarquía de aprobación, *para* gestionar mis ausencias de forma transparente.
+  * **Prioridad MoSCoW:** Should Have (Media) | **Estimación:** 3 Story Points | **WSJF:** 11.0
+* **2. Conversation (Conversación y Reglas de Negocio):**
+  * **RN-06.1:** La fecha final no puede ser anterior a la fecha inicial y los días solicitados no pueden exceder el saldo acumulado.
+* **3. Confirmation (Confirmación / Criterios de Aceptación BDD):**
+  * **CA-06.1:** Dada una solicitud dentro del saldo disponible, cuando se envía `POST /api/v1/solicitudes`, entonces retorna `HTTP 201 Created` en estado `PENDIENTE`.
+
+---
+
+## 4. Matriz de Validación bajo el Criterio INVEST
+
+Todas las Historias de Usuario del Product Backlog fueron auditadas con el modelo **INVEST** de Bill Wake:
+
+| ID | Historia de Usuario | **I**ndependent (Independiente) | **N**egotiable (Negociable) | **V**aluable (Valiosa) | **E**stimable (Estimable) | **S**mall (Pequeña) | **T**estable (Comprobable) | Estado DoR |
+|---|---|---|---|---|---|---|---|---|
+| **HU-01** | Autenticación JWT (`/auth/login`) | ✅ Sí, módulo desacoplado | ✅ Sí, claims configurables | ✅ Alta seguridad RBAC | ✅ 3 SP | ✅ 1 Sprint | ✅ `autenticacion.feature` | **READY** |
+| **HU-02** | Catálogo con Cache-Aside (`GET /recursos`) | ✅ Sí, interfaz Repository | ✅ Sí, TTL parametrizable | ✅ Reduce latencia 85% | ✅ 5 SP | ✅ 1 Sprint | ✅ `gestion_recursos.feature` | **READY** |
+| **HU-03** | Registro Políglota (`POST /recursos`) | ✅ Sí, eventos asíncronos | ✅ Sí, metadatos flexibles | ✅ Integridad ACID+Grafo | ✅ 5 SP | ✅ 1 Sprint | ✅ `gestion_recursos.feature` | **READY** |
+| **HU-04** | Detalle por ID (`GET /recursos/:id`) | ✅ Sí, lectura atómica | ✅ Sí, proyección parcial | ✅ Visión 360° de RRHH | ✅ 3 SP | ✅ 1 Sprint | ✅ `gestion_recursos.feature` | **READY** |
+| **HU-05** | Cálculo Nómina (Patrón Strategy) | ✅ Sí, Strategy aislada | ✅ Sí, tasas parametrizables | ✅ Automatiza planilla | ✅ 8 SP | ✅ 1 Sprint | ✅ `tests/unit/` | **READY** |
+| **HU-06** | Solicitudes de Ausencia (`/solicitudes`) | ✅ Sí, flujo autónomo | ✅ Sí, tipos configurables | ✅ Elimina papel físico | ✅ 3 SP | ✅ 1 Sprint | ✅ `gestion_recursos.feature` | **READY** |

@@ -1,0 +1,97 @@
+@startuml secuencia
+!theme plain
+autonumber
+skinparam backgroundColor #FFFFFF
+skinparam SequenceMessageAlignment center
+skinparam Style strictuml
+
+title Diagrama de Secuencia para Interacciones Criticas (UML 2.5.1)\nAutenticacion JWT, Cache-Aside (Redis/Mongo) y Transaccion Distribuida (PostgreSQL + Neo4j)
+
+actor Cliente as "Cliente Web / Movil"
+participant Gateway as "API Middleware\n(Auth & RFC 9457)"
+participant Controller as "RecursoController\n(/api/v1/recursos)"
+participant Service as "RecursoService\n(CircuitBreaker + GoF)"
+participant Redis as "Redis Cache\n(In-Memory TTL=300s)"
+participant Postgres as "PostgreSQL\n(Relacional ACID)"
+participant Mongo as "MongoDB\n(Documentos & Auditoria)"
+participant Neo4j as "Neo4j Graph DB\n(Nodos & Relaciones)"
+
+== Flujo 1: Consulta de Catalogo con Patron Cache-Aside (GET /api/v1/recursos) ==
+Cliente -> Gateway: GET /api/v1/recursos?departamento=Tecnologia\nAuthorization: Bearer <JWT>
+activate Gateway
+Gateway -> Gateway: Verificar firma JWT y permisos RBAC
+Gateway -> Controller: handleGetCatalogo(req)
+activate Controller
+Controller -> Service: listarRecursos(filtros)
+activate Service
+
+Service -> Redis: GET cacheKey("recursos:dept:Tecnologia:p1")
+activate Redis
+alt Cache HIT (Dato vigente en memoria, TTL > 0)
+  Redis -->> Service: JSON Payload (Latencia < 5ms)
+  Service -->> Controller: { data, meta: { cache: "HIT", ttl: 248 } }
+  Controller -->> Cliente: HTTP 200 OK (Header X-Cache: HIT)
+else Cache MISS (No existe o expiro TTL)
+  Redis -->> Service: null (Cache MISS)
+  deactivate Redis
+  Service -> Postgres: SELECT * FROM empleados WHERE departamento = 'Tecnologia'
+  activate Postgres
+  Postgres -->> Service: Filas relacionales ACID
+  deactivate Postgres
+  Service -> Mongo: db.expedientes.find({ empleadoId: { $in: ids } })
+  activate Mongo
+  Mongo -->> Service: Metadatos documentales enriquecidos
+  deactivate Mongo
+  Service -> Redis: SETEX "recursos:dept:Tecnologia:p1" 300 <JSON>
+  activate Redis
+  Redis -->> Service: OK
+  deactivate Redis
+  Service -->> Controller: { data, meta: { cache: "MISS", ttl: 300 } }
+  Controller -->> Cliente: HTTP 200 OK (Header X-Cache: MISS)
+end
+deactivate Service
+deactivate Controller
+deactivate Gateway
+
+== Flujo 2: Registro Transaccional y Consistencia Eventual (POST /api/v1/recursos) ==
+Cliente -> Gateway: POST /api/v1/recursos (Body JSON)
+activate Gateway
+Gateway -> Controller: handleCreateRecurso(req)
+activate Controller
+Controller -> Controller: Validar Esquema DTO con Zod
+
+alt Datos Invalidos (Violacion de Regla de Negocio)
+  Controller -> Gateway: throw ValidationProblemError
+  Gateway -->> Cliente: HTTP 400 Bad Request (Content-Type: application/problem+json)\n{ type: ".../validation-error", title: "Bad Request", status: 400, detail: "..." }
+else Datos Validos
+  Controller -> Service: registrarRecurso(validatedDTO)
+  activate Service
+  Service -> Postgres: BEGIN; INSERT INTO empleados (...) RETURNING id, codigo; COMMIT;
+  activate Postgres
+  Postgres -->> Service: Registro Creado (EMP-0150)
+  deactivate Postgres
+
+  group Consistencia Eventual via DomainEventBus (Patron Observer)
+    Service ->> Neo4j: MERGE (e:Empleado {codigo: 'EMP-0150'})-[:PERTENECE_A]->(d:Depto)
+    activate Neo4j
+    Neo4j -->> Service: Nodo y Relacion creados
+    deactivate Neo4j
+    Service ->> Mongo: db.auditoria_eventos.insertOne({ event: "RECURSO_CREADO", payload })
+    activate Mongo
+    Mongo -->> Service: ObjectId("6714...")
+    deactivate Mongo
+    Service ->> Redis: DEL "recursos:dept:*"
+    activate Redis
+    Redis -->> Service: Invalidado (1 key)
+    deactivate Redis
+  end
+
+  Service -->> Controller: RecursoCreadoDTO
+  deactivate Service
+  Controller -->> Gateway: HTTP 201 Created
+  Gateway -->> Cliente: HTTP 201 Created + Location: /api/v1/recursos/EMP-0150
+end
+deactivate Controller
+deactivate Gateway
+
+@enduml

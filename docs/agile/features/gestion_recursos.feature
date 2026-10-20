@@ -1,32 +1,57 @@
 # language: es
-Característica: Gestión de Solicitudes de Ausencia y Permisos Laborales
-  Como Empleado de la empresa
-  Quiero enviar solicitudes de vacaciones, permisos o incapacidades
-  Para que mi jefe inmediato y el departamento de RRHH puedan evaluar y aprobar mi ausencia.
+# Estándar Aplicado: ISO/IEC/IEEE 29119-3:2021 (Software Testing - Test Documentation)
+# Requerimiento Vinculado: REQ-FN-002, REQ-FN-004, REQ-FN-006 | Historia de Usuario: HU-02, HU-03, HU-04
+Característica: Gestión Políglota de Recursos y Colaboradores con Patrón Cache-Aside y Errores RFC 9457
+  Como Gestor de Recursos Humanos o Administrador del ERP
+  Quiero consultar, filtrar y registrar recursos/colaboradores mediante los endpoints /api/v1/recursos y /api/v1/empleados
+  Para garantizar lecturas rápidas desde Redis (Cache-Aside TTL) y escrituras consistentes en PostgreSQL, MongoDB y Neo4j.
 
-  Reglas de Negocio:
-  - La fecha de inicio debe ser posterior o igual a la fecha actual.
-  - La fecha de fin debe ser posterior o igual a la fecha de inicio.
-  - El empleado debe contar con días disponibles de vacaciones para el tipo "VACACIONES".
-  - Toda solicitud rechazada requiere ingresar obligatoriamente el motivo de rechazo.
+  Antecedentes:
+    Dado que el cliente posee un token JWT válido con rol "ADMIN_RRHH"
+    Y la capa de persistencia políglota conecta PostgreSQL, MongoDB, Redis (TTL=300s) y Neo4j
 
-  @happy_path
-  Escenario: Solicitud exitosa de vacaciones por parte de un colaborador
-    Dado que el empleado "EMP-0045" tiene 15 días disponibles de vacaciones
-    Y se encuentra en la pantalla "/dashboard/solicitudes/nuevo"
-    Cuando selecciona el tipo de ausencia "VACACIONES"
-    Y especifica la fecha inicio "2026-11-01" y fecha fin "2026-11-05" (5 días laborales)
-    Y redacta el motivo "Vacaciones anuales reglamentarias"
-    Y presiona "Enviar Solicitud"
-    Entonces la API POST "/api/v1/solicitudes" registra la solicitud en estado "PENDIENTE"
-    Y responde con HTTP 201 Created y el ID de la solicitud generada
-    Y el sistema envía una notificación por correo al jefe inmediato del colaborador
+  @cache_aside @happy_path @CP-04
+  Escenario: Consulta de catálogo de recursos aplicando patrón Cache-Aside (MISS seguido de HIT)
+    Dado que la clave de caché "cache:recursos:list:dept=Tecnologia:estado=ACTIVO:p=1:l=10" no existe en Redis
+    Cuando el cliente envía GET a "/api/v1/recursos?departamento=Tecnologia&estado=ACTIVO&page=1&limit=10"
+    Entonces el servidor responde con HTTP 200 OK y cabecera "X-Cache" igual a "MISS"
+    Y almacena el resultado en Redis con política de expiración TTL de 300 segundos
+    Cuando el cliente vuelve a enviar GET a "/api/v1/recursos?departamento=Tecnologia&estado=ACTIVO&page=1&limit=10" dentro de los 300 segundos
+    Entonces el servidor responde desde memoria Redis con HTTP 200 OK y cabecera "X-Cache" igual a "HIT"
 
-  @exception @error_path
-  Escenario: Rechazo de solicitud por superación del saldo de días disponibles
-    Dado que el empleado "EMP-0045" dispone únicamente de 3 días de vacaciones
-    Cuando intenta registrar una solicitud del "2026-11-01" al "2026-11-10" (8 días laborales)
-    Y presiona "Enviar Solicitud"
-    Entonces el servicio de validación de negocio bloquea la solicitud
-    Y retorna el código HTTP 400 Bad Request
-    Y muestra el mensaje "Días solicitados (8) superan el saldo disponible del colaborador (3 días)."
+  @polyglot_write @happy_path @CP-05
+  Escenario: Registro exitoso de un nuevo recurso con propagación a PostgreSQL, Neo4j y MongoDB
+    Dado que el Gestor de RRHH prepara el registro de un nuevo recurso con DPI "2987654320101" y salario base 16500.00
+    Cuando envía una petición POST a "/api/v1/recursos" con los datos válidos del recurso
+    Entonces PostgreSQL persiste el registro transaccional y retorna HTTP 201 Created
+    Y el bus de eventos Observer crea el nodo jerárquico en Neo4j y la auditoría en MongoDB
+    Y el servicio Cache-Aside invalida las claves de listado en Redis
+
+  @bdd_outline @iso29119 @CP-06
+  Esquema del escenario: Validación de reglas de negocio y respuestas RFC 9457 en creación de recursos
+    Dado que el Gestor de RRHH envía una solicitud POST al endpoint "/api/v1/recursos"
+    Cuando suministra el nombre "<nombres>", DPI "<dpi>", departamento "<departamento>" y salario base <salario_base>
+    Entonces el endpoint retorna el código HTTP <status_http>
+    Y el tipo de contenido de la respuesta es "<content_type>"
+    Y el código de estado de negocio devuelto es "<codigo_esperado>"
+
+    Ejemplos:
+      | nombres        | dpi           | departamento | salario_base | status_http | content_type             | codigo_esperado    |
+      | Elena Sofía    | 2540198270101 | Tecnología   | 18500.00     | 201         | application/json         | CREATED            |
+      | Marco Tulio    | 3120987650101 | Finanzas     | 12000.00     | 201         | application/json         | CREATED            |
+      | Pedro Inválido | 12345         | Tecnología   | 10000.00     | 400         | application/problem+json | VALIDATION_ERROR   |
+      | Ana SalarioB   | 2999888770101 | Ventas       | 2500.00      | 400         | application/problem+json | VALIDATION_ERROR   |
+      |                | 2777666550101 | Operaciones  | 8500.00      | 400         | application/problem+json | VALIDATION_ERROR   |
+
+  @detail_by_id @rfc9457 @CP-07
+  Esquema del escenario: Consulta de detalle de elemento por ID (GET /api/v1/recursos/:id)
+    Dado que el usuario consulta el identificador de recurso "<id_recurso>"
+    Cuando realiza una petición GET a "/api/v1/recursos/<id_recurso>"
+    Entonces el sistema responde con el código HTTP <status_http>
+    Y el formato de respuesta corresponde a "<content_type>"
+
+    Ejemplos:
+      | id_recurso                           | status_http | content_type             |
+      | b1000000-0000-0000-0000-000000000001 | 200         | application/json         |
+      | EMP-001                              | 200         | application/json         |
+      | id-inexistente-9999                  | 404         | application/problem+json |

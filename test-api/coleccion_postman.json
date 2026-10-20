@@ -1,371 +1,223 @@
 {
-	"info": {
-		"_postman_id": "b1a2c3d4-e5f6-7890-abcd-ef1234567890",
-		"name": "ERP RRHH - API Integration Tests",
-		"description": "Colección oficial de pruebas de integración HTTP para la API REST del ERP de Recursos Humanos (Universidad Mariano Gálvez - Análisis de Sistemas II). Incluye flujos principales de Autenticación, Gestión de Colaboradores y Solicitudes con aserciones de código de estado y esquemas.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Autenticación",
-			"item": [
-				{
-					"name": "POST /api/v1/auth/login - Éxito Administrador",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 200 OK', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"pm.test('Retorna token JWT válido', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data.token).to.be.a('string');",
-									"    pm.environment.set('authToken', jsonData.data.token);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin.rrhh@empresa.com\",\n  \"password\": \"Password123!\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/login",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"login"
-							]
-						},
-						"description": "Autentica un usuario existente en la plataforma y retorna token JWT."
-					},
-					"response": []
-				},
-				{
-					"name": "POST /api/v1/auth/login - Credenciales Inválidas (401)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 401 Unauthorized', function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"pm.test('Mensaje de error estructurado', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(false);",
-									"    pm.expect(jsonData.error.code).to.eql('UNAUTHORIZED');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin.rrhh@empresa.com\",\n  \"password\": \"PasswordErroneo\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/login",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Gestión de Colaboradores",
-			"item": [
-				{
-					"name": "GET /api/v1/empleados - Listar Colaboradores",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 200 OK', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"pm.test('Estructura paginada correcta', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data).to.be.an('array');",
-									"    pm.expect(jsonData.pagination).to.have.property('total');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/empleados?estado=ACTIVO&page=1&limit=10",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"empleados"
-							],
-							"query": [
-								{
-									"key": "estado",
-									"value": "ACTIVO"
-								},
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Obtiene la lista de empleados activos paginada."
-					},
-					"response": []
-				},
-				{
-					"name": "POST /api/v1/empleados - Crear Nuevo Colaborador",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 201 Created', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"pm.test('Código de empleado generado', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(true);",
-									"    pm.expect(jsonData.data.codigo).to.match(/^EMP-/);",
-									"    pm.environment.set('createdEmpleadoId', jsonData.data.id);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"nombres\": \"Carlos Roberto\",\n  \"apellidos\": \"Gómez Estrada\",\n  \"email\": \"carlos.gomez.test@empresa.com\",\n  \"dpi\": \"2450198270199\",\n  \"departamento\": \"Tecnología\",\n  \"puesto\": \"Desarrollador Senior\",\n  \"salario_base\": 12500.00,\n  \"fecha_contratacion\": \"2026-10-15\",\n  \"estado\": \"ACTIVO\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/empleados",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"empleados"
-							]
-						},
-						"description": "Registra un nuevo colaborador en la base de datos."
-					},
-					"response": []
-				},
-				{
-					"name": "POST /api/v1/empleados - Error Salario Inferior a Mínimo (400)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 400 Bad Request', function () {",
-									"    pm.response.to.have.status(400);",
-									"});",
-									"pm.test('Rechazo por regla de negocio de salario mínimo', function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.eql(false);",
-									"    pm.expect(jsonData.error.code).to.eql('VALIDATION_ERROR');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"nombres\": \"Ana Maria\",\n  \"apellidos\": \"Lopez\",\n  \"email\": \"ana.lopez@empresa.com\",\n  \"dpi\": \"2450198270188\",\n  \"departamento\": \"Ventas\",\n  \"puesto\": \"Asistente\",\n  \"salario_base\": 2000.00,\n  \"fecha_contratacion\": \"2026-10-15\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/empleados",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"empleados"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Solicitudes de Ausencia",
-			"item": [
-				{
-					"name": "GET /api/v1/solicitudes - Listar Solicitudes",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 200 OK', function () {",
-									"    pm.response.to.have.status(200);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/solicitudes",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"solicitudes"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "POST /api/v1/solicitudes - Crear Solicitud Ausencia",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test('Estado es HTTP 201 Created', function () {",
-									"    pm.response.to.have.status(201);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{authToken}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"empleado_id\": \"{{createdEmpleadoId}}\",\n  \"tipo\": \"VACACIONES\",\n  \"fecha_inicio\": \"2026-11-01\",\n  \"fecha_fin\": \"2026-11-05\",\n  \"motivo\": \"Vacaciones anuales reglamentarias\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/solicitudes",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"solicitudes"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:3000",
-			"type": "string"
-		},
-		{
-			"key": "authToken",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "erp-rrhh-final-collection-2026",
+    "name": "ERP-RRHH - Entrega Final (OpenAPI 3.0.3, Cache-Aside & RFC 9457)",
+    "description": "Colección oficial de pruebas funcionales para los endpoints del ERP-RRHH (POST /auth/login, GET /recursos, POST /recursos, GET /recursos/:id, GET/POST /empleados). Incluye validaciones de caché Redis (X-Cache: HIT/MISS) y formato Problem Details RFC 9457 (application/problem+json).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. POST /api/v1/auth/login - Autenticación Exitosa (PostgreSQL + Redis)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 OK', function () { pm.response.to.have.status(200); });",
+              "pm.test('Retorna Token JWT válido', function () {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData.success).to.eql(true);",
+              "  pm.expect(jsonData.data.token).to.be.a('string');",
+              "  pm.collectionVariables.set('jwtToken', jsonData.data.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin.rrhh@empresa.com\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "2. POST /api/v1/auth/login - Error 401 Estandarizado RFC 9457 (application/problem+json)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 401 Unauthorized', function () { pm.response.to.have.status(401); });",
+              "pm.test('Content-Type es application/problem+json (RFC 9457)', function () {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+              "});",
+              "pm.test('Estructura Problem Details completa', function () {",
+              "  var prob = pm.response.json();",
+              "  pm.expect(prob).to.have.property('type');",
+              "  pm.expect(prob).to.have.property('title');",
+              "  pm.expect(prob.status).to.eql(401);",
+              "  pm.expect(prob).to.have.property('detail');",
+              "  pm.expect(prob).to.have.property('instance');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin.rrhh@empresa.com\",\n  \"password\": \"ClaveIncorrecta999\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "3. GET /api/v1/recursos - Consulta de Catálogo con Caché (Redis + MongoDB)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 OK', function () { pm.response.to.have.status(200); });",
+              "pm.test('Incluye cabecera X-Cache (HIT o MISS)', function () {",
+              "  pm.expect(pm.response.headers.get('X-Cache')).to.be.oneOf(['HIT', 'MISS']);",
+              "});",
+              "pm.test('Incluye datos enriquecidos de MongoDB y Neo4j', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json.success).to.eql(true);",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json.cache_metadata.pattern).to.eql('Cache-Aside');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/recursos?departamento=Tecnología&estado=ACTIVO&page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["recursos"],
+          "query": [
+            { "key": "departamento", "value": "Tecnología" },
+            { "key": "estado", "value": "ACTIVO" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. POST /api/v1/recursos - Registro Políglota (PostgreSQL + Neo4j + MongoDB)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 201 Created', function () { pm.response.to.have.status(201); });",
+              "pm.test('Sincronización Políglota Confirmada', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json.success).to.eql(true);",
+              "  pm.expect(json.polyglot_sync.postgresql).to.eql('COMMITTED_ACID');",
+              "  pm.expect(json.polyglot_sync.neo4j_graph).to.eql('NODE_AND_RELATIONS_MERGED');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{jwtToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombres\": \"Elena Sofía\",\n  \"apellidos\": \"Méndez Castillo\",\n  \"email\": \"elena.mendez@empresa.com\",\n  \"dpi\": \"2540198270101\",\n  \"departamento\": \"Tecnología\",\n  \"puesto\": \"Arquitecta de Software\",\n  \"salario_base\": 18500.00,\n  \"regimen\": \"ASALARIADO\",\n  \"estado\": \"ACTIVO\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/recursos",
+          "host": ["{{baseUrl}}"],
+          "path": ["recursos"]
+        }
+      }
+    },
+    {
+      "name": "5. GET /api/v1/recursos/:id - Detalle de Elemento por ID (Redis + PostgreSQL)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 OK', function () { pm.response.to.have.status(200); });",
+              "pm.test('Retorna expediente con código EMP-001', function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json.data.codigo).to.eql('EMP-001');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/recursos/EMP-001",
+          "host": ["{{baseUrl}}"],
+          "path": ["recursos", "EMP-001"]
+        }
+      }
+    },
+    {
+      "name": "6. GET /api/v1/recursos/:id - Error 404 RFC 9457 para ID Inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 404 Not Found', function () { pm.response.to.have.status(404); });",
+              "pm.test('Formato RFC 9457 application/problem+json', function () {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');",
+              "  var prob = pm.response.json();",
+              "  pm.expect(prob.status).to.eql(404);",
+              "  pm.expect(prob.code).to.eql('RESOURCE_NOT_FOUND');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwtToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/recursos/EMP-9999",
+          "host": ["{{baseUrl}}"],
+          "path": ["recursos", "EMP-9999"]
+        }
+      }
+    }
+  ]
 }

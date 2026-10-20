@@ -1,0 +1,174 @@
+@startuml clases
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam classAttributeIconSize 0
+skinparam roundcorner 6
+skinparam Shadowing false
+skinparam PackageStyle rectangle
+
+title Diagrama de Clases de Análisis y Diseño (UML 2.5.1 - OMG)\nSistema ERP de Gestión de Recursos Humanos y Recursos Corporativos
+
+package "Capa de Presentación & Controladores REST (API-First)" {
+  class AuthController <<Controller>> {
+    +handleLogin(req: NextRequest): Promise<NextResponse>
+    +verifyToken(token: string): JwtPayload
+  }
+
+  class RecursoController <<Controller>> {
+    +handleGetCatalogo(req: NextRequest): Promise<NextResponse>
+    +handleCreateRecurso(req: NextRequest): Promise<NextResponse>
+    +handleGetRecursoById(req: NextRequest, id: string): Promise<NextResponse>
+  }
+
+  class EmpleadoController <<Controller>> {
+    +handleGet(req: NextRequest): Promise<NextResponse>
+    +handlePost(req: NextRequest): Promise<NextResponse>
+    +handleGetById(req: NextRequest, id: string): Promise<NextResponse>
+  }
+
+  class ProblemDetailsMiddleware <<Middleware RFC 9457>> {
+    +type: string
+    +title: string
+    +status: number
+    +detail: string
+    +instance: string
+    +toResponse(err: Error, instance: string): NextResponse
+  }
+}
+
+package "Capa de Servicios de Negocio & Patrones GoF" {
+  interface ICalculoNominaStrategy <<Strategy>> {
+    +calcularDeducciones(salarioBase: number): DesgloseNominaDTO
+  }
+
+  class RegimenAsalariadoStrategy <<ConcreteStrategy>> {
+    -tasaIGSS: number = 0.0483
+    -bonoIncentivo: number = 250.00
+    +calcularDeducciones(salarioBase: number): DesgloseNominaDTO
+  }
+
+  class RegimenServiciosStrategy <<ConcreteStrategy>> {
+    -tasaISRRetencion: number = 0.05
+    +calcularDeducciones(salarioBase: number): DesgloseNominaDTO
+  }
+
+  interface IDomainEventObserver <<Observer>> {
+    +update(event: DomainEvent): Promise<void>
+  }
+
+  class DomainEventBus <<Subject>> {
+    -observers: IDomainEventObserver[]
+    +subscribe(observer: IDomainEventObserver): void
+    +publish(event: DomainEvent): Promise<void>
+  }
+
+  class CircuitBreaker <<Resilience Pattern>> {
+    -state: CircuitState
+    -failureCount: number
+    -threshold: number = 3
+    +execute<T>(action: () => Promise<T>): Promise<T>
+  }
+
+  class CacheAsideService <<Cache Pattern>> {
+    -ttlSeconds: number = 300
+    +getOrSet<T>(key: string, fetcher: () => Promise<T>): Promise<CacheResult<T>>
+    +invalidate(pattern: string): Promise<void>
+  }
+
+  class ExternalErpGateway <<Gateway Pattern>> {
+    +notificarIGSS(planillaId: string): Promise<boolean>
+    +dispersarPagoBancario(cuenta: string, monto: number): Promise<string>
+  }
+
+  class RecursoService <<Service>> {
+    -repository: IRecursoRepository
+    -cache: CacheAsideService
+    -eventBus: DomainEventBus
+    -breaker: CircuitBreaker
+    +listarRecursos(filtros: FiltroDTO): Promise<RecursoDTO[]>
+    +registrarRecurso(dto: CrearRecursoDTO): Promise<RecursoDTO>
+    +obtenerPorId(id: string): Promise<RecursoDTO>
+  }
+}
+
+package "Capa de Dominio & Persistencia Políglota (Repository)" {
+  interface IRecursoRepository <<Repository>> {
+    +findAll(filtros: FiltroDTO): Promise<RecursoEntity[]>
+    +findById(id: string): Promise<RecursoEntity | null>
+    +save(entity: RecursoEntity): Promise<RecursoEntity>
+  }
+
+  class Departamento <<Entity>> {
+    +id: UUID
+    +nombre: string
+    +presupuestoAnual: number
+  }
+
+  class Empleado <<Entity>> {
+    +id: UUID
+    +codigo: string
+    +dpi: string
+    +nombres: string
+    +apellidos: string
+    +salarioBase: number
+    +estado: EstadoEmpleado
+  }
+
+  class ExpedienteDigital <<Document MongoDB>> {
+    +id: ObjectId
+    +empleadoId: UUID
+    +certificaciones: string[]
+    +evaluaciones360: Map<string, any>
+  }
+
+  class Nomina <<AggregateRoot>> {
+    +id: UUID
+    +periodoInicio: Date
+    +periodoFin: Date
+    +totalNeto: number
+    +estado: EstadoNomina
+  }
+
+  class DetalleNomina <<ValueObject / Entity>> {
+    +id: UUID
+    +salarioBase: number
+    +igssLaboral: number
+    +isrRetenido: number
+    +salarioNeto: number
+  }
+
+  class SolicitudAusencia <<Entity>> {
+    +id: UUID
+    +tipo: TipoAusencia
+    +fechaInicio: Date
+    +fechaFin: Date
+    +diasSolicitados: number
+    +estado: EstadoSolicitud
+  }
+}
+
+' Relaciones de Composición, Agregación, Implementación y Cardinalidad
+Departamento "1" o-- "0..*" Empleado : agrupa >
+Empleado "1" *-- "1" ExpedienteDigital : posee >
+Nomina "1" *-- "1..*" DetalleNomina : compuesta por >
+Empleado "1" -- "0..*" DetalleNomina : percibe >
+Empleado "1" -- "0..*" SolicitudAusencia : solicita >
+Empleado "0..1" -- "0..*" Empleado : supervisa (Jefe) >
+
+RecursoController --> RecursoService : invoca >
+EmpleadoController --> RecursoService : utiliza >
+RecursoController ..> ProblemDetailsMiddleware : estandariza errores >
+AuthController ..> ProblemDetailsMiddleware : estandariza errores >
+
+RecursoService *-- CircuitBreaker : protege con >
+RecursoService o-- CacheAsideService : acelera con >
+RecursoService o-- DomainEventBus : publica en >
+RecursoService --> IRecursoRepository : persiste vía >
+RecursoService --> ICalculoNominaStrategy : calcula con >
+RecursoService --> ExternalErpGateway : integra con >
+
+RegimenAsalariadoStrategy ..|> ICalculoNominaStrategy
+RegimenServiciosStrategy ..|> ICalculoNominaStrategy
+DomainEventBus "1" o-- "0..*" IDomainEventObserver : notifica >
+
+@enduml

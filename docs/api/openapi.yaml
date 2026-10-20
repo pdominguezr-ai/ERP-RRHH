@@ -1,38 +1,82 @@
 openapi: 3.0.3
 info:
-  title: API de Gestión de Recursos Humanos (ERP RRHH)
+  title: API de Gestión de Recursos Humanos y Recursos Corporativos (ERP-RRHH)
   description: |
-    API RESTful estandarizada para la administración integral del ciclo de vida del colaborador en el ERP de Recursos Humanos.
-    Expone operaciones para gestión de colaboradores, nóminas, asistencias, solicitudes de ausencia, procesos de selección y auditoría.
-  version: 1.0.0
+    Especificación formal **API-First** bajo **OpenAPI 3.0.3** para el Sistema ERP de Gestión de Recursos Humanos.
+    
+    ### Estándares Internacionales Aplicados:
+    - **RFC 9110 (HTTP Semantics):** Uso semántico de métodos HTTP (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`), cabeceras de caché (`X-Cache`, `X-Cache-TTL`) y códigos de respuesta.
+    - **RFC 9457 (Problem Details for HTTP APIs):** Todas las respuestas de error (`400`, `401`, `403`, `404`, `409`, `500`) se retornan bajo el Media Type oficial `application/problem+json` con estructura unificada (`type`, `title`, `status`, `detail`, `instance`, `code`, `timestamp`, `errors`).
+    - **Persistencia Políglota:** PostgreSQL (Transaccional ACID), MongoDB (Expedientes Documentales y Auditoría), Redis (Patrón Cache-Aside con TTL = 300s/600s) y Neo4j (Grafo Jerárquico Organizacional).
+    - **Interoperabilidad Multi-Protocolo (GraphQL & gRPC):**
+      - *Federación GraphQL:* El endpoint `/api/graphql` (conceptual) permite proyectar en una sola consulta el expediente de PostgreSQL, las competencias de MongoDB y los subordinados de Neo4j evitando *over-fetching*.
+      - *Comunicación Interna gRPC:* Los cálculos masivos de planilla e impuestos (`PayrollCalculationService.CalculateBatch`) están modelados mediante contratos Protocol Buffers (`proto3`) sobre HTTP/2 para baja latencia inter-servicios.
+  version: 2.0.0
   contact:
-    name: Equipo de Arquitectura de Software - Grupo XX
-    email: soporte-rrhh@umg.edu.gt
+    name: Paul Dominguez (9989-23-9308) & Jorge Morataya (9989-23-340) - Universidad Mariano Gálvez
+    email: pdominguezr@miumg.edu.gt
 servers:
-  - url: https://api.rrhh.example.com/api/v1
-    description: Servidor de Producción / Staging
   - url: http://localhost:3000/api/v1
-    description: Servidor Local de Desarrollo
+    description: Servidor Local de Desarrollo y Pruebas Funcionales (Next.js 16)
+  - url: https://api.rrhh.umg.edu.gt/api/v1
+    description: Servidor de Producción / Staging
 
 security:
   - bearerAuth: []
 
 paths:
-  /empleados:
-    get:
-      summary: Listar colaboradores
-      description: Retorna la lista paginada y filtrada de empleados registrados en la organización.
-      operationId: getEmpleados
+  /auth/login:
+    post:
+      summary: Autenticación y generación de Token JWT
+      description: |
+        Autentica las credenciales institucionales contra **PostgreSQL**, registra la sesión activa en **Redis** (`TTL = 3600s`) y emite una traza en **MongoDB**. En caso de fallo, responde con estructura **RFC 9457 (`application/problem+json`)**.
+      operationId: loginUser
+      security: []
       tags:
-        - Empleados
+        - Autenticación (PostgreSQL + Redis)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+            examples:
+              adminValido:
+                summary: Credenciales de Administrador RRHH
+                value:
+                  email: "admin.rrhh@empresa.com"
+                  password: "Password123!"
+              credencialesInvalidas:
+                summary: Ejemplo que dispara Error 401 RFC 9457
+                value:
+                  email: "admin.rrhh@empresa.com"
+                  password: "ClaveErronea!"
+      responses:
+        '200':
+          description: Autenticación exitosa y emisión de JWT.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        '400':
+          $ref: '#/components/responses/ProblemBadRequest400'
+        '401':
+          $ref: '#/components/responses/ProblemUnauthorized401'
+        '403':
+          $ref: '#/components/responses/ProblemForbidden403'
+        '500':
+          $ref: '#/components/responses/ProblemInternalError500'
+
+  /recursos:
+    get:
+      summary: Consulta de catálogo con caché (Patrón Cache-Aside)
+      description: |
+        Retorna el catálogo paginado y filtrado de recursos/colaboradores.
+        Aplica el patrón **Cache-Aside** en **Redis** con política de expiración `TTL = 300 segundos`, combinando datos relacionales de **PostgreSQL** con documentos de **MongoDB** y jerarquía de **Neo4j**.
+      operationId: getRecursosCatalogo
+      tags:
+        - Recursos Políglotas (Redis + MongoDB + PostgreSQL + Neo4j)
       parameters:
-        - name: estado
-          in: query
-          description: Filtrar por estado del empleado
-          required: false
-          schema:
-            type: string
-            enum: [ACTIVO, INACTIVO, SUSPENDIDO]
         - name: departamento
           in: query
           description: Filtrar por departamento funcional
@@ -40,9 +84,15 @@ paths:
           schema:
             type: string
             example: "Tecnología"
+        - name: estado
+          in: query
+          description: Filtrar por estado operativo
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVO, INACTIVO, SUSPENDIDO]
         - name: page
           in: query
-          description: Número de página
           required: false
           schema:
             type: integer
@@ -50,7 +100,6 @@ paths:
             minimum: 1
         - name: limit
           in: query
-          description: Cantidad de registros por página
           required: false
           schema:
             type: integer
@@ -58,19 +107,138 @@ paths:
             maximum: 100
       responses:
         '200':
-          description: Listado de empleados obtenido exitosamente.
+          description: Catálogo recuperado exitosamente (con cabeceras X-Cache HIT/MISS).
+          headers:
+            X-Cache:
+              description: Indica si la respuesta provino de Redis (HIT) o de PostgreSQL/MongoDB (MISS).
+              schema:
+                type: string
+                enum: [HIT, MISS]
+            X-Cache-TTL:
+              description: Tiempo de vida restante en segundos de la clave en Redis.
+              schema:
+                type: integer
+                example: 300
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmpleadoListResponse'
+                $ref: '#/components/schemas/RecursoListResponse'
         '401':
-          $ref: '#/components/schemas/ErrorResponse401'
+          $ref: '#/components/responses/ProblemUnauthorized401'
         '500':
-          $ref: '#/components/schemas/ErrorResponse500'
+          $ref: '#/components/responses/ProblemInternalError500'
+
+    post:
+      summary: Registro de nuevo elemento (PostgreSQL + Neo4j + MongoDB)
+      description: |
+        Registra transaccionalmente un nuevo recurso/colaborador en **PostgreSQL**, publica un evento en el `DomainEventBus` (Patrón **Observer**) que crea el nodo jerárquico en **Neo4j**, inserta el expediente/auditoría en **MongoDB** e invalida el caché en **Redis**.
+      operationId: createRecurso
+      tags:
+        - Recursos Políglotas (Redis + MongoDB + PostgreSQL + Neo4j)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpleadoCreateRequest'
+            examples:
+              recursoValido:
+                summary: Registro válido de recurso corporativo
+                value:
+                  nombres: "Elena Sofía"
+                  apellidos: "Méndez Castillo"
+                  email: "elena.mendez@empresa.com"
+                  dpi: "2540198270101"
+                  departamento: "Tecnología"
+                  puesto: "Arquitecta de Soluciones Cloud"
+                  salario_base: 19500.00
+                  regimen: "ASALARIADO"
+                  estado: "ACTIVO"
+      responses:
+        '201':
+          description: Recurso creado y sincronizado en la arquitectura políglota.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecursoCreatedResponse'
+        '400':
+          $ref: '#/components/responses/ProblemBadRequest400'
+        '401':
+          $ref: '#/components/responses/ProblemUnauthorized401'
+        '500':
+          $ref: '#/components/responses/ProblemInternalError500'
+
+  /recursos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador UUID o código correlativo (ej. EMP-001) del recurso
+        schema:
+          type: string
+          example: "EMP-001"
+    get:
+      summary: Detalle de elemento por ID (Redis + PostgreSQL + Neo4j)
+      description: |
+        Recupera el expediente integral de un recurso por su ID o código, protegido por **Cache-Aside** (`TTL = 600s`) y patrón **Circuit Breaker**. Si no existe, retorna `404 Not Found` bajo **RFC 9457 (`application/problem+json`)**.
+      operationId: getRecursoById
+      tags:
+        - Recursos Políglotas (Redis + MongoDB + PostgreSQL + Neo4j)
+      responses:
+        '200':
+          description: Recurso encontrado exitosamente.
+          headers:
+            X-Cache:
+              schema:
+                type: string
+                enum: [HIT, MISS]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '404':
+          $ref: '#/components/responses/ProblemNotFound404'
+        '500':
+          $ref: '#/components/responses/ProblemInternalError500'
+
+  /empleados:
+    get:
+      summary: Listar colaboradores (con Cache-Aside)
+      operationId: getEmpleados
+      tags:
+        - Empleados
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVO, INACTIVO, SUSPENDIDO]
+        - name: departamento
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Listado paginado de colaboradores.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecursoListResponse'
+        '500':
+          $ref: '#/components/responses/ProblemInternalError500'
 
     post:
       summary: Crear un nuevo colaborador
-      description: Registra un nuevo empleado en el sistema generando correlativo automático de código.
       operationId: createEmpleado
       tags:
         - Empleados
@@ -88,25 +256,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmpleadoResponse'
         '400':
-          $ref: '#/components/schemas/ErrorResponse400'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
+          $ref: '#/components/responses/ProblemBadRequest400'
         '500':
-          $ref: '#/components/schemas/ErrorResponse500'
+          $ref: '#/components/responses/ProblemInternalError500'
 
   /empleados/{id}:
     parameters:
       - name: id
         in: path
         required: true
-        description: Identificador UUID único del empleado
         schema:
           type: string
-          format: uuid
-
     get:
-      summary: Obtener detalle de empleado
-      description: Retorna el expediente completo del empleado especificado.
+      summary: Obtener detalle de colaborador por ID
       operationId: getEmpleadoById
       tags:
         - Empleados
@@ -117,202 +279,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmpleadoResponse'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
         '404':
-          $ref: '#/components/schemas/ErrorResponse404'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
+          $ref: '#/components/responses/ProblemNotFound404'
 
-    put:
-      summary: Actualizar información de empleado
-      description: Actualiza los datos laborales, salariales o de contacto del empleado.
-      operationId: updateEmpleado
-      tags:
-        - Empleados
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmpleadoUpdateRequest'
-      responses:
-        '200':
-          description: Empleado actualizado exitosamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmpleadoResponse'
-        '400':
-          $ref: '#/components/schemas/ErrorResponse400'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '404':
-          $ref: '#/components/schemas/ErrorResponse404'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-    delete:
-      summary: Desactivar colaborador (Soft Delete)
-      description: Cambia el estado del colaborador a INACTIVO sin destruir integridad referencial histórica.
-      operationId: deactivateEmpleado
-      tags:
-        - Empleados
-      responses:
-        '200':
-          description: Empleado desactivado correctamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmpleadoResponse'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '404':
-          $ref: '#/components/schemas/ErrorResponse404'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-  /nominas:
-    get:
-      summary: Listar períodos de nómina
-      description: Retorna el histórico de períodos de nómina generados con sus totales acumulados.
-      operationId: getNominas
-      tags:
-        - Nóminas
-      responses:
-        '200':
-          description: Lista de nóminas recuperada.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/NominaHeader'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-    post:
-      summary: Aperturar nuevo período de nómina
-      description: Genera la cabecera en estado BORRADOR y precarga los salarios de todos los empleados activos.
-      operationId: createNomina
-      tags:
-        - Nóminas
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NominaCreateRequest'
-      responses:
-        '201':
-          description: Nómina aperturada con éxito.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NominaResponse'
-        '400':
-          $ref: '#/components/schemas/ErrorResponse400'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-  /nominas/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: Identificador UUID de la nómina
-        schema:
-          type: string
-          format: uuid
-
-    get:
-      summary: Obtener desglose de nómina
-      description: Retorna la cabecera y el detalle individualizado por colaborador con percepciones y deducciones.
-      operationId: getNominaById
-      tags:
-        - Nóminas
-      responses:
-        '200':
-          description: Nómina completa con desglose de detalle.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NominaResponse'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '404':
-          $ref: '#/components/schemas/ErrorResponse404'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-  /nominas/{id}/procesar:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: Identificador UUID de la nómina a procesar
-        schema:
-          type: string
-          format: uuid
-
-    post:
-      summary: Procesar y consolidar nómina
-      description: Valida el estado BORRADOR, recalcula totales agregados y bloquea modificaciones cambiando a PROCESADA.
-      operationId: procesarNomina
-      tags:
-        - Nóminas
-      responses:
-        '200':
-          description: Nómina consolidada y procesada.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NominaResponse'
-        '400':
-          $ref: '#/components/schemas/ErrorResponse400'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '404':
-          $ref: '#/components/schemas/ErrorResponse404'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-  /solicitudes-ausencia:
+  /solicitudes:
     get:
       summary: Listar solicitudes de ausencia
-      description: Retorna las solicitudes de vacaciones, permisos o enfermedad según el rol del usuario autenticado.
-      operationId: getSolicitudesAusencia
+      operationId: getSolicitudes
       tags:
         - Solicitudes de Ausencia
-      parameters:
-        - name: estado
-          in: query
-          required: false
-          schema:
-            type: string
-            enum: [PENDIENTE, APROBADA, RECHAZADA]
       responses:
         '200':
-          description: Listado de solicitudes obtenido.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SolicitudAusenciaResponse'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
+          description: Listado de solicitudes obtenido exitosamente.
     post:
       summary: Registrar solicitud de ausencia
-      description: Permite a un empleado solicitar vacaciones, permiso o ausencia laboral por enfermedad.
-      operationId: createSolicitudAusencia
+      operationId: createSolicitud
       tags:
         - Solicitudes de Ausencia
       requestBody:
@@ -324,54 +305,8 @@ paths:
       responses:
         '201':
           description: Solicitud radicada en estado PENDIENTE.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SolicitudAusenciaResponse'
         '400':
-          $ref: '#/components/schemas/ErrorResponse400'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
-
-  /solicitudes-ausencia/{id}/estado:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: Identificador UUID de la solicitud de ausencia
-        schema:
-          type: string
-          format: uuid
-
-    patch:
-      summary: Resolver solicitud (Aprobar o Rechazar)
-      description: Permite a un Jefe Inmediato o Administrador de RRHH autorizar o denegar una ausencia.
-      operationId: updateSolicitudEstado
-      tags:
-        - Solicitudes de Ausencia
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SolicitudEstadoUpdateRequest'
-      responses:
-        '200':
-          description: Estado de solicitud actualizado correctamente.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SolicitudAusenciaResponse'
-        '400':
-          $ref: '#/components/schemas/ErrorResponse400'
-        '401':
-          $ref: '#/components/schemas/ErrorResponse401'
-        '404':
-          $ref: '#/components/schemas/ErrorResponse404'
-        '500':
-          $ref: '#/components/schemas/ErrorResponse500'
+          $ref: '#/components/responses/ProblemBadRequest400'
 
 components:
   securitySchemes:
@@ -379,94 +314,206 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Ingrese el token JWT de sesión emitido por Supabase Auth en el formato 'Bearer <token>'.
+      description: Token JWT emitido por POST /api/v1/auth/login.
+
+  responses:
+    ProblemBadRequest400:
+      description: Error de validación de datos o regla de negocio (RFC 9110 / RFC 9457).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://erp-rrhh.umg.edu.gt/probs/validation-error"
+            title: "Violación de Reglas de Validación de Negocio (RFC 9457)"
+            status: 400
+            detail: "El salario base no puede ser inferior al mínimo legal vigente de Q 3,384.59"
+            instance: "/api/v1/recursos"
+            code: "VALIDATION_ERROR"
+            timestamp: "2026-10-19T21:50:00.000Z"
+            errors:
+              salario_base:
+                - "El salario base no puede ser inferior al mínimo legal vigente de Q 3,384.59"
+
+    ProblemUnauthorized401:
+      description: Credenciales inválidas o token JWT ausente/expirado (RFC 9110 / RFC 9457).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://erp-rrhh.umg.edu.gt/probs/unauthorized"
+            title: "Credenciales de Acceso Inválidas"
+            status: 401
+            detail: "Credenciales inválidas. Por favor verifique su correo institucional y contraseña."
+            instance: "/api/v1/auth/login"
+            code: "UNAUTHORIZED"
+            timestamp: "2026-10-19T21:50:00.000Z"
+
+    ProblemForbidden403:
+      description: Cuenta inactiva o permisos insuficientes para la operación (RFC 9457).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+
+    ProblemNotFound404:
+      description: Recurso no encontrado en el sistema (RFC 9110 / RFC 9457).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            type: "https://erp-rrhh.umg.edu.gt/probs/resource-not-found"
+            title: "Recurso o Colaborador No Encontrado"
+            status: 404
+            detail: "No existe ningún recurso registrado con el identificador 'EMP-9999' en PostgreSQL."
+            instance: "/api/v1/recursos/EMP-9999"
+            code: "RESOURCE_NOT_FOUND"
+            timestamp: "2026-10-19T21:50:00.000Z"
+
+    ProblemInternalError500:
+      description: Error inesperado en el servidor o motor de persistencia (RFC 9457).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
 
   schemas:
-    # ------------------ DTOs EMPLEADOS ------------------
+    ProblemDetails:
+      type: object
+      description: Estructura estándar RFC 9457 (Problem Details for HTTP APIs).
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://erp-rrhh.umg.edu.gt/probs/validation-error"
+        title:
+          type: string
+          example: "Violación de Reglas de Validación de Negocio"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "Uno o más campos del recurso no cumplen las restricciones del contrato."
+        instance:
+          type: string
+          example: "/api/v1/recursos"
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        timestamp:
+          type: string
+          format: date-time
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    AuthLoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "admin.rrhh@empresa.com"
+        password:
+          type: string
+          minLength: 6
+          example: "Password123!"
+
+    AuthLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        code:
+          type: string
+          example: "AUTH_SUCCESS"
+        message:
+          type: string
+          example: "Autenticación exitosa"
+        data:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                email:
+                  type: string
+                nombre:
+                  type: string
+                rol:
+                  type: string
+            token:
+              type: string
+            expiresIn:
+              type: integer
+              example: 3600
+
     EmpleadoCreateRequest:
       type: object
       required:
         - nombres
         - apellidos
-        - correo
-        - fecha_ingreso
-        - puesto
+        - dpi
         - departamento
+        - puesto
         - salario_base
       properties:
-        codigo:
-          type: string
-          example: "EMP-0145"
-          description: Código opcional; si no se suministra, el backend lo genera automáticamente.
         nombres:
           type: string
           example: "Carlos Roberto"
         apellidos:
           type: string
           example: "Morales Gómez"
-        correo:
+        email:
           type: string
           format: email
           example: "cmorales@empresa.com"
-        telefono:
+        dpi:
           type: string
-          example: "+502 5555-1234"
-        direccion:
-          type: string
-          example: "Zona 10, Ciudad de Guatemala"
-        fecha_nacimiento:
-          type: string
-          format: date
-          example: "1992-05-18"
-        fecha_ingreso:
-          type: string
-          format: date
-          example: "2026-02-01"
-        puesto:
-          type: string
-          example: "Ingeniero de Software Senior"
+          minLength: 13
+          maxLength: 13
+          example: "2450198270101"
         departamento:
           type: string
           example: "Tecnología"
+        puesto:
+          type: string
+          example: "Ingeniero de Software Senior"
         salario_base:
           type: number
           format: double
-          minimum: 0
+          minimum: 3384.59
           example: 18500.00
+        regimen:
+          type: string
+          enum: [ASALARIADO, SERVICIOS_PROFESIONALES, EJECUTIVO]
+          default: ASALARIADO
+        fecha_contratacion:
+          type: string
+          format: date
+          example: "2026-02-01"
         estado:
           type: string
           enum: [ACTIVO, INACTIVO, SUSPENDIDO]
           default: ACTIVO
-        jefe_inmediato_id:
-          type: string
-          format: uuid
-          nullable: true
-
-    EmpleadoUpdateRequest:
-      type: object
-      properties:
-        nombres:
-          type: string
-        apellidos:
-          type: string
-        telefono:
-          type: string
-        direccion:
-          type: string
-        puesto:
-          type: string
-        departamento:
-          type: string
-        salario_base:
-          type: number
-          format: double
-        estado:
-          type: string
-          enum: [ACTIVO, INACTIVO, SUSPENDIDO]
-        jefe_inmediato_id:
-          type: string
-          format: uuid
-          nullable: true
 
     EmpleadoResponse:
       type: object
@@ -476,164 +523,99 @@ components:
           format: uuid
         codigo:
           type: string
+          example: "EMP-001"
+        dpi:
+          type: string
+          example: "2450198270101"
         nombres:
           type: string
         apellidos:
           type: string
         correo:
           type: string
-          format: email
-        telefono:
-          type: string
-        direccion:
-          type: string
-        fecha_nacimiento:
-          type: string
-          format: date
-        fecha_ingreso:
-          type: string
-          format: date
-        puesto:
-          type: string
         departamento:
+          type: string
+        puesto:
           type: string
         salario_base:
           type: number
         estado:
           type: string
-          enum: [ACTIVO, INACTIVO, SUSPENDIDO]
-        jefe_inmediato_id:
-          type: string
-          format: uuid
+        expediente_mongodb:
+          type: object
           nullable: true
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+          description: Datos documentales provenientes de MongoDB
+        jerarquia_neo4j:
+          type: object
+          nullable: true
+          description: Relaciones de grafo provenientes de Neo4j
+        proyeccion_nomina_strategy:
+          type: object
+          description: Desglose salarial calculado mediante Patrón Strategy
 
-    EmpleadoListResponse:
+    RecursoListResponse:
       type: object
       properties:
+        success:
+          type: boolean
+          example: true
         data:
           type: array
           items:
             $ref: '#/components/schemas/EmpleadoResponse'
-        meta:
-          $ref: '#/components/schemas/PaginationMeta'
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+            page:
+              type: integer
+            limit:
+              type: integer
+            totalPages:
+              type: integer
+        cache_metadata:
+          type: object
+          properties:
+            pattern:
+              type: string
+              example: "Cache-Aside"
+            status:
+              type: string
+              enum: [HIT, MISS]
+            ttl_seconds:
+              type: integer
+              example: 300
 
-    PaginationMeta:
+    RecursoCreatedResponse:
       type: object
       properties:
-        page:
-          type: integer
-          example: 1
-        limit:
-          type: integer
-          example: 10
-        total:
-          type: integer
-          example: 45
-        totalPages:
-          type: integer
-          example: 5
+        success:
+          type: boolean
+          example: true
+        code:
+          type: string
+          example: "CREATED"
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/EmpleadoResponse'
+        polyglot_sync:
+          type: object
+          properties:
+            postgresql:
+              type: string
+              example: "COMMITTED_ACID"
+            neo4j_graph:
+              type: string
+              example: "NODE_AND_RELATIONS_MERGED"
+            mongodb_audit:
+              type: string
+              example: "DOCUMENT_INSERTED"
+            redis_cache:
+              type: string
+              example: "INVALIDATED_LIST_KEYS"
 
-    # ------------------ DTOs NÓMINA ------------------
-    NominaCreateRequest:
-      type: object
-      required:
-        - periodo_inicio
-        - periodo_fin
-      properties:
-        periodo_inicio:
-          type: string
-          format: date
-          example: "2026-09-01"
-        periodo_fin:
-          type: string
-          format: date
-          example: "2026-09-30"
-        observaciones:
-          type: string
-          example: "Nómina ordinaria correspondiente a Septiembre 2026"
-
-    NominaHeader:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        periodo_inicio:
-          type: string
-          format: date
-        periodo_fin:
-          type: string
-          format: date
-        estado:
-          type: string
-          enum: [BORRADOR, PROCESADA, PAGADA, ANULADA]
-        total_bruto:
-          type: number
-        total_deducciones:
-          type: number
-        total_bonificaciones:
-          type: number
-        total_neto:
-          type: number
-        observaciones:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-
-    DetalleNominaItem:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        empleado_id:
-          type: string
-          format: uuid
-        empleado_nombre:
-          type: string
-          example: "Carlos Roberto Morales Gómez"
-        codigo_empleado:
-          type: string
-          example: "EMP-0145"
-        puesto:
-          type: string
-          example: "Ingeniero de Software Senior"
-        salario_base:
-          type: number
-          example: 18500.00
-        bonificaciones:
-          type: number
-          example: 250.00
-        deducciones:
-          type: number
-          example: 900.00
-        retenciones:
-          type: number
-          example: 893.55
-        salario_neto:
-          type: number
-          example: 16956.45
-        observaciones:
-          type: string
-
-    NominaResponse:
-      type: object
-      properties:
-        header:
-          $ref: '#/components/schemas/NominaHeader'
-        detalles:
-          type: array
-          items:
-            $ref: '#/components/schemas/DetalleNominaItem'
-
-    # ------------------ DTOs SOLICITUDES ------------------
     SolicitudAusenciaCreateRequest:
       type: object
       required:
@@ -645,46 +627,6 @@ components:
       properties:
         empleado_id:
           type: string
-          format: uuid
-        tipo:
-          type: string
-          enum: [PERMISO, VACACIONES, ENFERMEDAD, OTRO]
-        fecha_inicio:
-          type: string
-          format: date
-          example: "2026-10-05"
-        fecha_fin:
-          type: string
-          format: date
-          example: "2026-10-10"
-        motivo:
-          type: string
-          example: "Vacaciones semestrales programadas y acordadas con jefatura."
-
-    SolicitudEstadoUpdateRequest:
-      type: object
-      required:
-        - estado
-      properties:
-        estado:
-          type: string
-          enum: [APROBADA, RECHAZADA]
-        observaciones:
-          type: string
-          example: "Aprobado según disponibilidad del equipo técnico."
-
-    SolicitudAusenciaResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        empleado_id:
-          type: string
-          format: uuid
-        empleado_nombre:
-          type: string
-          example: "Carlos Morales"
         tipo:
           type: string
           enum: [PERMISO, VACACIONES, ENFERMEDAD, OTRO]
@@ -694,74 +636,5 @@ components:
         fecha_fin:
           type: string
           format: date
-        dias_solicitados:
-          type: integer
-          example: 6
         motivo:
           type: string
-        estado:
-          type: string
-          enum: [PENDIENTE, APROBADA, RECHAZADA]
-        aprobado_por:
-          type: string
-          format: uuid
-          nullable: true
-        fecha_aprobacion:
-          type: string
-          format: date-time
-          nullable: true
-        observaciones:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-
-    # ------------------ RESPUESTAS ESTÁNDAR ERROR ------------------
-    ErrorBody:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            codigo:
-              type: string
-              example: "ERR_VALIDATION"
-            mensaje:
-              type: string
-              example: "Uno o más campos obligatorios no cumplen con el formato requerido."
-            detalles:
-              type: array
-              items:
-                type: string
-              example: ["fecha_fin debe ser igual o posterior a fecha_inicio"]
-
-    ErrorResponse400:
-      description: Solicitud errónea o datos de validación incorrectos.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorBody'
-
-    ErrorResponse401:
-      description: No autenticado o token JWT expirado/inválido.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorBody'
-
-    ErrorResponse404:
-      description: Recurso no encontrado en el sistema.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorBody'
-
-    ErrorResponse500:
-      description: Error interno en el servidor o motor de persistencia.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorBody'

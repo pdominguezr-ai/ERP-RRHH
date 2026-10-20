@@ -1,0 +1,58 @@
+@startuml paquetes
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam PackageStyle folder
+skinparam roundcorner 6
+
+title Diagrama de Paquetes y Modularización Arquitectónica (UML 2.5.1)\nSistema ERP-RRHH con Arquitectura en Capas, API-First y Persistencia Políglota
+
+package "Presentación UX/UI (Mobile-First & Atomic Design)" as UI {
+  package "src/components/ui (Átomos)" as Atomos
+  package "src/components/forms (Moléculas)" as Moleculas
+  package "src/components/tables & layout (Organismos)" as Organismos
+  package "src/app/dashboard (Páginas Next.js 16)" as Paginas
+
+  Paginas ..> Organismos : compone
+  Organismos ..> Moleculas : agrupa
+  Moleculas ..> Atomos : utiliza
+}
+
+package "Capa de Exposición API-First (REST / OpenAPI 3.0.3)" as API {
+  package "src/app/api/v1 (Endpoints)" as Endpoints
+  package "src/middlewares (RFC 9457 & Auth JWT)" as Middlewares
+  package "src/controllers (Auth, Recurso, Empleado)" as Controllers
+
+  Endpoints ..> Middlewares : intercepta con
+  Endpoints ..> Controllers : delega a
+}
+
+package "Capa de Dominio, Servicios & Patrones GoF" as Dominio {
+  package "src/services (Lógica de Negocio)" as Services
+  package "src/services/patterns (Strategy, Observer, Gateway, CircuitBreaker)" as GoF
+  package "src/lib/validators (DTOs & Reglas Zod)" as Validators
+
+  Controllers ..> Validators : valida DTOs
+  Controllers ..> Services : invoca
+  Services ..> GoF : aplica patrones
+}
+
+package "Capa de Acceso a Datos & Persistencia Políglota" as Datos {
+  package "src/models (Repositorios)" as Models
+  package "src/config (Conectores Políglotas)" as Config
+
+  database "PostgreSQL (ACID)" as PG
+  database "MongoDB (Documental)" as MONGO
+  database "Redis (Cache-Aside TTL)" as REDIS
+  database "Neo4j (Grafo Jerárquico)" as NEO4J
+
+  Services ..> Models : abstrae persistencia
+  Models ..> Config : usa clientes
+  Config ..> PG : SQL / RLS
+  Config ..> MONGO : BSON / JSON
+  Config ..> REDIS : Key-Value TTL
+  Config ..> NEO4J : Cypher Graph
+}
+
+Paginas ..> Endpoints : consume HTTP/JSON
+
+@enduml

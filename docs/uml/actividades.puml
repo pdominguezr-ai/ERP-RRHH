@@ -1,0 +1,62 @@
+@startuml actividades
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityBorderColor #1E3A8A
+skinparam ActivityDiamondBackgroundColor #EFF6FF
+skinparam ActivityDiamondBorderColor #2563EB
+
+title Diagrama de Actividades con Calles de Responsabilidad - Swimlanes (UML 2.5.1)\nProceso Integral de Gestión de Recursos, Solicitudes y Liquidación de Nómina
+
+|Colaborador / Solicitante|
+start
+:Autenticarse en Portal Mobile-First (/login);
+:Ingresar datos de Solicitud o Recurso;
+:Enviar formulario hacia API REST;
+
+|API Gateway & Validador DTO|
+:Verificar Token JWT (Bearer Auth);
+if (¿Token válido y rol autorizado?) then (No)
+  :Generar respuesta RFC 9457\n(HTTP 401/403 application/problem+json);
+  stop
+else (Sí)
+  :Validar estructura y reglas con Zod;
+  if (¿Cumple reglas de negocio?) then (No)
+    :Retornar Problem Details HTTP 400\ncon detalle de campos inválidos;
+    stop
+  else (Sí)
+  endif
+endif
+
+|Jefe Inmediato / Gestor RRHH|
+:Recibir notificación de solicitud pendiente;
+:Revisar disponibilidad en Organigrama (Neo4j)\ny saldo de días disponibles (PostgreSQL);
+if (¿Aprueba la operación?) then (Rechaza)
+  :Registrar motivo obligatorio de rechazo;
+  |Motor de Persistencia Políglota|
+  :Actualizar estado a RECHAZADA en PostgreSQL;
+  :Guardar traza de auditoría en MongoDB;
+  |Colaborador / Solicitante|
+  :Recibir alerta con motivo de rechazo;
+  stop
+else (Aprueba)
+  |Jefe Inmediato / Gestor RRHH|
+  :Confirmar aprobación con firma digital;
+endif
+
+|Motor de Persistencia Políglota|
+fork
+  :Persistir transacción ACID en PostgreSQL\n(Tablas empleados / nominas / solicitudes);
+fork again
+  :Actualizar relaciones de equipo y nodos\nen base de datos de grafos Neo4j;
+fork again
+  :Almacenar documento de expediente y\nbitácora inmutable en MongoDB;
+fork again
+  :Invalidar claves afectadas en Redis Cache\n(Patrón Cache-Aside TTL);
+end fork
+
+|Colaborador / Solicitante|
+:Visualizar comprobante actualizado en tiempo real;
+stop
+
+@enduml

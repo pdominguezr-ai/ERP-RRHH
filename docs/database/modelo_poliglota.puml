@@ -1,0 +1,100 @@
+@startuml modelo_poliglota
+!theme plain
+allowmixing
+skinparam backgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam Shadowing false
+
+title Arquitectura de Persistencia Poliglota y Patron Cache-Aside\nPostgreSQL (Relacional) + MongoDB (Documental) + Redis (Cache en Memoria) + Neo4j (Grafos)
+
+package "Capa de Aplicacion Backend (src/services & src/models)" {
+  component "PolyglotDataCoordinator\n(Repository + Observer + Circuit Breaker)" as Coordinator
+  component "CacheAsideManager\n(Politica TTL = 300s, Write-Invalidate)" as CacheMgr
+}
+
+package "1. PostgreSQL (Supabase) - Motor Relacional Transaccional (ACID)" #EFF6FF {
+  class "empleados (Tabla SQL)" as pg_emp {
+    + id : UUID <<PK>>
+    + codigo : VARCHAR(20) <<UK>>
+    + dpi : VARCHAR(13) <<UK>>
+    + nombres : VARCHAR(100)
+    + salario_base : NUMERIC(12,2)
+    + estado : VARCHAR(20)
+  }
+  class "nominas & detalle_nomina (Tablas SQL)" as pg_nom {
+    + id : UUID <<PK>>
+    + periodo_inicio : DATE
+    + total_neto : NUMERIC(14,2)
+    + estado : VARCHAR(20)
+  }
+  class "solicitudes_ausencia (Tabla SQL)" as pg_sol {
+    + id : UUID <<PK>>
+    + empleado_id : UUID <<FK>>
+    + tipo : VARCHAR(20)
+    + estado : VARCHAR(20)
+  }
+  pg_emp "1" -- "0..*" pg_nom
+  pg_emp "1" -- "0..*" pg_sol
+}
+
+package "2. Redis 7.x (In-Memory) - Almacen Clave-Valor Sub-milisegundo" #FEF2F2 {
+  class "Cache de Catalogo y Recursos" as r_cat {
+    + key: "cache:recursos:list:{hash}"
+    + ttl: 300 segundos (5 min)
+    + policy: "Cache-Aside + Write-Invalidate"
+  }
+  class "Cache de Expediente Individual" as r_id {
+    + key: "cache:recurso:id:{uuid}"
+    + ttl: 600 segundos (10 min)
+  }
+  class "Sesiones JWT & Rate Limit" as r_jwt {
+    + key: "auth:blacklist:{jti}"
+    + ttl: 3600 segundos (60 min)
+  }
+}
+
+package "3. MongoDB 7.0 (NoSQL Documental) - Esquema Flexible & Bitacora" #F0FDF4 {
+  class "Coleccion: expedientes_digitales" as m_exp {
+    + _id: ObjectId
+    + empleado_id: UUID
+    + competencias: String[]
+    + evaluaciones_360: Document[]
+    + certificaciones_json: Object
+  }
+  class "Coleccion: auditoria_eventos" as m_aud {
+    + _id: ObjectId
+    + event_type: String
+    + payload_before: Object
+    + payload_after: Object
+    + timestamp: ISODate
+  }
+}
+
+package "4. Neo4j 5.x (Base de Datos de Grafos) - Relaciones Jerarquicas" #FEFCE8 {
+  class "Nodo (:Empleado)" as n_emp {
+    + uuid: String
+    + codigo: String
+    + puesto: String
+  }
+  class "Nodo (:Departamento)" as n_dep {
+    + nombre: String
+    + centro_costo: String
+  }
+  class "Nodo (:Competencia)" as n_hab {
+    + codigo: String
+    + nivel: Integer
+  }
+  n_emp --> n_emp : "[:REPORTA_A]"
+  n_emp --> n_dep : "[:PERTENECE_A]"
+  n_emp --> n_hab : "[:DOMINA]"
+}
+
+Coordinator --> CacheMgr : 1. Lectura rapida (Cache-Aside)
+CacheMgr --> r_cat : GET / SETEX (TTL=300s)
+CacheMgr --> r_id : GET / SETEX (TTL=600s)
+Coordinator --> pg_emp : 2. Transacciones ACID (SQL)
+Coordinator --> m_exp : 3. Documentos JSON
+Coordinator --> m_aud : 4. Bitacora Inmutable
+Coordinator --> n_emp : 5. Consultas de Grafo (Cypher)
+
+@enduml

@@ -1,0 +1,88 @@
+@startuml c4_nivel4_codigo
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam classAttributeIconSize 0
+skinparam roundcorner 6
+
+title Modelo C4 - Nivel 4: Diagrama de Código de Componentes Críticos\nImplementación de Patrones GoF, Cache-Aside (Redis) y Manejo de Errores RFC 9457
+
+package "src/middlewares (Estándar RFC 9457 Problem Details)" {
+  class ProblemDetails <<RFC 9457>> {
+    +type: string
+    +title: string
+    +status: number
+    +detail: string
+    +instance: string
+    +code: string
+    +timestamp: string
+    +errors?: Record<string, string[]>
+  }
+
+  class ProblemDetailsFactory {
+    +{static} badRequest(detail: string, instance: string, errors?: any): NextResponse
+    +{static} unauthorized(detail: string, instance: string): NextResponse
+    +{static} notFound(detail: string, instance: string): NextResponse
+    +{static} internalError(detail: string, instance: string): NextResponse
+  }
+}
+
+package "src/services (Patrones GoF & Cache-Aside)" {
+  interface ICacheStore {
+    +get<T>(key: string): Promise<T | null>
+    +set<T>(key: string, value: T, ttlSeconds: number): Promise<void>
+    +invalidatePattern(prefix: string): Promise<number>
+  }
+
+  class RedisCacheAsideManager implements ICacheStore {
+    -store: Map<string, CacheEntry>
+    -defaultTtl: number = 300
+    +getOrFetch<T>(key: string, ttl: number, fallback: () => Promise<T>): Promise<{data: T, hit: boolean}>
+  }
+
+  interface IPayrollCalculationStrategy <<Strategy>> {
+    +calculate(baseSalary: number): PayrollBreakdown
+  }
+
+  class GuatemalanLaborStrategy implements IPayrollCalculationStrategy {
+    +IGSS_RATE: number = 0.0483
+    +BONUS_DECRETO_37_2001: number = 250.00
+    +calculate(baseSalary: number): PayrollBreakdown
+  }
+
+  class CircuitBreakerExecutor <<Circuit Breaker>> {
+    -state: "CLOSED" | "OPEN" | "HALF_OPEN"
+    -failures: number
+    -resetTimeoutMs: number = 30000
+    +execute<T>(fn: () => Promise<T>, fallback?: () => Promise<T>): Promise<T>
+  }
+
+  class PolyglotEventBus <<Observer>> {
+    -listeners: Array<(event: PolyglotSyncEvent) => Promise<void>>
+    +onSync(listener: (event: PolyglotSyncEvent) => Promise<void>): void
+    +emitSync(event: PolyglotSyncEvent): Promise<void>
+  }
+}
+
+package "src/controllers & src/models (Endpoints Funcionales)" {
+  class RecursoController {
+    +getRecursos(req: NextRequest): Promise<NextResponse>
+    +createRecurso(req: NextRequest): Promise<NextResponse>
+    +getRecursoById(req: NextRequest, id: string): Promise<NextResponse>
+  }
+
+  class PolyglotRecursoRepository <<Repository>> {
+    +queryPostgresCatalog(filters: ResourceFilter): Promise<ResourceRecord[]>
+    +getMongoMetadata(resourceId: string): Promise<Record<string, any>>
+    +syncNeo4jHierarchyNode(record: ResourceRecord): Promise<void>
+  }
+}
+
+RecursoController --> RedisCacheAsideManager : Cache-Aside (TTL 300s)
+RecursoController --> PolyglotRecursoRepository : CRUD Políglota
+RecursoController --> ProblemDetailsFactory : Errores application/problem+json
+PolyglotRecursoRepository --> CircuitBreakerExecutor : Tolerancia a fallos
+PolyglotRecursoRepository --> PolyglotEventBus : Consistencia Eventual
+PolyglotRecursoRepository --> GuatemalanLaborStrategy : Cálculo Salarial
+ProblemDetailsFactory ..> ProblemDetails : instancia
+
+@enduml

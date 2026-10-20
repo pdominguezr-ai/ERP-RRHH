@@ -1,12 +1,13 @@
 {
   "name": "gestion-rrhh",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsx --test tests/unit/gof_patterns.test.ts tests/integration/api_endpoints.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
