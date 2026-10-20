@@ -2,7 +2,7 @@
  * Punto de Entrada Principal del Backend (src/app.js)
  * Sistema ERP de Gestión de Recursos Humanos (ERP-RRHH)
  * Universidad Mariano Gálvez de Guatemala - Análisis de Sistemas II
- * Integrantes: Paul Dominguez (9989-23-9308) | Jorge Morataya (9989-23-340)
+ * Integrantes: Paul Dominguez (9989-23-9308) | Jorge Morataya (9989-23-340) | Britany Yamileth Meza Chinchilla (9989-23-3181)
  *
  * Este módulo documenta y expone el registro de rutas API-First (OpenAPI 3.0.3),
  * Middlewares RFC 9457 (application/problem+json), Patrones GoF y Conexión Políglota

@@ -13,7 +13,7 @@ info:
       - *Comunicación Interna gRPC:* Los cálculos masivos de planilla e impuestos (`PayrollCalculationService.CalculateBatch`) están modelados mediante contratos Protocol Buffers (`proto3`) sobre HTTP/2 para baja latencia inter-servicios.
   version: 2.0.0
   contact:
-    name: Paul Dominguez (9989-23-9308) & Jorge Morataya (9989-23-340) - Universidad Mariano Gálvez
+    name: Paul Dominguez (9989-23-9308), Jorge Morataya (9989-23-340) & Britany Yamileth Meza Chinchilla (9989-23-3181) - Universidad Mariano Gálvez
     email: pdominguezr@miumg.edu.gt
 servers:
   - url: http://localhost:3000/api/v1

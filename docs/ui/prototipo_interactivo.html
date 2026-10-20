@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figma Prototype Viewer — ERP-RRHH (UMG Análisis de Sistemas II)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: #1e1e1e; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Top Figma-style Toolbar */
+    .figma-toolbar {
+      background: #2c2c2c;
+      border-bottom: 1px solid #3f3f46;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .figma-brand { display: flex; align-items: center; gap: 12px; }
+    .figma-logo {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: linear-gradient(135deg, #f24e1e 0%, #a259ff 50%, #1abcfe 100%);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 15px;
+    }
+    .figma-title { font-size: 13px; font-weight: 700; color: #ffffff; }
+    .figma-subtitle { font-size: 11px; color: #a1a1aa; }
+
+    .toolbar-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .toolbar-btn {
+      background: #383838; color: #e4e4e7; border: 1px solid #52525b;
+      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .toolbar-btn:hover { background: #4b5563; }
+    .toolbar-btn.active { background: #2563eb; border-color: #3b82f6; color: #ffffff; }
+
+    .wcag-pill {
+      background: #065f46; color: #a7f3d0; border: 1px solid #10b981;
+      padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    }
+
+    /* Main Workspace */
+    .workspace { display: flex; flex: 1; overflow: hidden; }
+
+    /* Left Layers / Screens Panel */
+    .layers-panel {
+      width: 260px; background: #252526; border-right: 1px solid #3f3f46;
+      padding: 16px 12px; display: flex; flex-direction: column; gap: 14px;
+    }
+    .panel-heading { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.6px; }
+    .screen-list { display: flex; flex-direction: column; gap: 6px; }
+    .screen-item {
+      padding: 9px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 500;
+      color: #d4d4d8; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid transparent; transition: all 0.15s;
+    }
+    .screen-item:hover { background: #323236; }
+    .screen-item.active { background: #1e3a8a; color: #ffffff; border-color: #3b82f6; font-weight: 600; }
+    .screen-badge { font-size: 10px; background: #3f3f46; padding: 2px 6px; border-radius: 4px; color: #e4e4e7; }
+
+    .atomic-legend {
+      margin-top: auto; background: #18181b; border: 1px solid #3f3f46;
+      border-radius: 8px; padding: 12px; font-size: 11.5px; line-height: 1.5;
+    }
+    .atomic-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+    /* Center Canvas */
+    .canvas-area {
+      flex: 1; background: #18181b; background-image: radial-gradient(#3f3f46 1px, transparent 1px);
+      background-size: 20px 20px; padding: 24px; display: flex; justify-content: center; align-items: flex-start;
+      overflow-y: auto;
+    }
+
+    /* Device Frame */
+    .device-frame {
+      background: #f8fafc; color: #0f172a; border-radius: 14px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      border: 4px solid #334155; overflow: hidden; transition: width 0.25s ease;
+      width: 100%; max-width: 1060px; min-height: 640px; display: flex; flex-direction: column;
+    }
+    .device-frame.mobile-mode {
+      max-width: 390px; border-width: 8px; border-radius: 28px;
+    }
+
+    /* App Shell inside Prototype */
+    .erp-shell { display: flex; flex: 1; min-height: 600px; }
+    .erp-sidebar {
+      width: 220px; background: #0f172a; color: #f8fafc; padding: 20px 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .device-frame.mobile-mode .erp-sidebar { display: none; }
+    .erp-sidebar-brand { font-size: 15px; font-weight: 800; color: #38bdf8; margin-bottom: 16px; padding: 0 8px; }
+    .erp-nav-btn {
+      padding: 10px 12px; border-radius: 6px; font-size: 13px; color: #cbd5e1;
+      cursor: pointer; text-align: left; background: transparent; border: none; font-weight: 500;
+    }
+    .erp-nav-btn:hover, .erp-nav-btn.active { background: #1e3a8a; color: #ffffff; font-weight: 600; }
+
+    .erp-main { flex: 1; display: flex; flex-direction: column; background: #f1f5f9; }
+    .erp-topbar {
+      background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .erp-content { padding: 20px; flex: 1; }
+
+    /* UI Atoms & Molecules */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .kpi-card {
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .kpi-label { font-size: 12px; color: #475569; font-weight: 600; }
+    .kpi-val { font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 6px; }
+    .kpi-trend { font-size: 11px; color: #166534; font-weight: 600; margin-top: 4px; }
+
+    .card-panel { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; }
+    .btn-primary {
+      background: #1d4ed8; color: #ffffff; border: none; min-height: 44px; padding: 10px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary:hover { background: #1e40af; }
+    .btn-outline {
+      background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; min-height: 44px; padding: 10px 16px;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    .badge-status {
+      display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    }
+    .badge-activo { background: #dcfce7; color: #166534; }
+    .badge-pendiente { background: #fef3c7; color: #92400e; }
+
+    table.erp-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+    table.erp-table th { background: #f8fafc; color: #334155; text-align: left; padding: 10px; border-bottom: 2px solid #cbd5e1; }
+    table.erp-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: #1e293b; }
+    .form-group input, .form-group select {
+      min-height: 44px; padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 13px;
+    }
+    .form-group input:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
+
+    /* Atomic Highlight Mode */
+    .show-atomic [data-atomic="atom"] { outline: 2px dashed #10b981 !important; position: relative; }
+    .show-atomic [data-atomic="molecule"] { outline: 2px dashed #f59e0b !important; position: relative; }
+    .show-atomic [data-atomic="organism"] { outline: 2px dashed #3b82f6 !important; position: relative; }
+
+    .screen-view { display: none; }
+    .screen-view.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="figma-toolbar">
+    <div class="figma-brand">
+      <div class="figma-logo">F</div>
+      <div>
+        <div class="figma-title">ERP-RRHH — Prototipo Interactivo Navegable (Atomic Design &amp; Mobile-First)</div>
+        <div class="figma-subtitle">Integrantes: Paul Dominguez (9989-23-9308) &bull; Jorge Morataya (9989-23-340) &bull; Britany Yamileth Meza Chinchilla (9989-23-3181)</div>
+      </div>
+    </div>
+    <div class="toolbar-controls">
+      <span class="wcag-pill">WCAG 2.2 AA (15.8:1)</span>
+      <button class="toolbar-btn active" id="btn-desktop" onclick="setViewport('desktop')">🖥️ Desktop (1440px)</button>
+      <button class="toolbar-btn" id="btn-mobile" onclick="setViewport('mobile')">📱 Mobile-First (375px)</button>
+      <button class="toolbar-btn" id="btn-atomic" onclick="toggleAtomic()">⚛️ Inspector Atomic Design</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <!-- Left Screen Selector -->
+    <aside class="layers-panel">
+      <div class="panel-heading">Pantallas del Flujo (User Flow)</div>
+      <div class="screen-list">
+        <div class="screen-item active" onclick="showScreen('dashboard', this)">
+          <span>1. Panel Principal (KPIs)</span>
+          <span class="screen-badge">/dashboard</span>
+        </div>
+        <div class="screen-item" onclick="showScreen('empleados', this)">
+          <span>2. Catálogo Recursos (Caché)</span>
+          <span class="screen-badge">GET /recursos</span>
+        </div>
+        <div class="screen-item" onclick="showScreen('nuevo', this)">
+          <span>3. Nuevo Colaborador (DTO)</span>
+          <span class="screen-badge">POST /recursos</span>
+        </div>
+        <div class="screen-item" onclick="showScreen('nomina', this)">
+          <span>4. Nómina (Patrón Strategy)</span>
+          <span class="screen-badge">/nomina</span>
+        </div>
+        <div class="screen-item" onclick="showScreen('solicitudes', this)">
+          <span>5. Solicitudes de Ausencia</span>
+          <span class="screen-badge">/solicitudes</span>
+        </div>
+        <div class="screen-item" onclick="showScreen('login', this)">
+          <span>6. Login Institucional JWT</span>
+          <span class="screen-badge">POST /login</span>
+        </div>
+      </div>
+
+      <div class="atomic-legend">
+        <div style="font-weight:700; color:#fff; margin-bottom:6px;">Arquitectura Atomic Design</div>
+        <div><span class="atomic-dot" style="background:#10b981;"></span><strong>Átomos:</strong> Botones 44px, Badges, Inputs</div>
+        <div><span class="atomic-dot" style="background:#f59e0b;"></span><strong>Moléculas:</strong> FormField + Validación Zod</div>
+        <div><span class="atomic-dot" style="background:#3b82f6;"></span><strong>Organismos:</strong> DataTable, Sidebar, Form</div>
+      </div>
+    </aside>
+
+    <!-- Main Interactive Prototype Canvas -->
+    <main class="canvas-area">
+      <div class="device-frame" id="device-frame">
+        <div class="erp-shell">
+          <nav class="erp-sidebar" data-atomic="organism">
+            <div class="erp-sidebar-brand">⚡ ERP-RRHH UMG</div>
+            <button class="erp-nav-btn active" onclick="showScreenById('dashboard')">📊 Panel Principal</button>
+            <button class="erp-nav-btn" onclick="showScreenById('empleados')">👥 Recursos / Personal</button>
+            <button class="erp-nav-btn" onclick="showScreenById('nuevo')">➕ Registrar Recurso</button>
+            <button class="erp-nav-btn" onclick="showScreenById('nomina')">💰 Planilla y Nómina</button>
+            <button class="erp-nav-btn" onclick="showScreenById('solicitudes')">📅 Vacaciones / Permisos</button>
+            <button class="erp-nav-btn" onclick="showScreenById('login')">🔐 Cerrar Sesión (JWT)</button>
+          </nav>
+
+          <div class="erp-main">
+            <header class="erp-topbar" data-atomic="organism">
+              <div>
+                <strong style="font-size:15px; color:#0f172a;">Sistema ERP de Gestión de Recursos Humanos</strong>
+                <div style="font-size:11.5px; color:#475569;">Persistencia Políglota: PostgreSQL + MongoDB + Redis (Cache-Aside) + Neo4j</div>
+              </div>
+              <span class="badge-status badge-activo" data-atomic="atom">ROL: ADMIN_RRHH</span>
+            </header>
+
+            <div class="erp-content">
+              <!-- SCREEN 1: DASHBOARD -->
+              <section id="screen-dashboard" class="screen-view active">
+                <div class="kpi-grid" data-atomic="organism">
+                  <div class="kpi-card" data-atomic="molecule">
+                    <div class="kpi-label">COLABORADORES ACTIVOS</div>
+                    <div class="kpi-val">48</div>
+                    <div class="kpi-trend">⚡ Redis Cache HIT (&lt; 5ms)</div>
+                  </div>
+                  <div class="kpi-card" data-atomic="molecule">
+                    <div class="kpi-label">NÓMINA MENSUAL (OCT 2026)</div>
+                    <div class="kpi-val">Q 139,500.00</div>
+                    <div class="kpi-trend">✔ Calculada con Strategy GoF</div>
+                  </div>
+                  <div class="kpi-card" data-atomic="molecule">
+                    <div class="kpi-label">NODOS JERÁRQUICOS NEO4J</div>
+                    <div class="kpi-val">6 Deptos</div>
+                    <div class="kpi-trend">🔗 Sincronización Observer</div>
+                  </div>
+                  <div class="kpi-card" data-atomic="molecule">
+                    <div class="kpi-label">SOLICITUDES PENDIENTES</div>
+                    <div class="kpi-val">3</div>
+                    <div class="kpi-trend">⏳ SLA Jefatura &lt; 24h</div>
+                  </div>
+                </div>
+
+                <div class="card-panel" data-atomic="organism">
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div>
+                      <h3 style="font-size:15px; color:#0f172a;">Catálogo Reciente de Colaboradores y Recursos</h3>
+                      <p style="font-size:12px; color:#475569;">Endpoint: <code>GET /api/v1/recursos?page=1&amp;limit=10</code> &bull; Header: <code>X-Cache: HIT (TTL=300s)</code></p>
+                    </div>
+                    <button class="btn-primary" data-atomic="atom" onclick="showScreenById('nuevo')">+ Nuevo Colaborador</button>
+                  </div>
+                  <table class="erp-table">
+                    <thead>
+                      <tr>
+                        <th>Código</th>
+                        <th>Colaborador</th>
+                        <th>Departamento (Neo4j)</th>
+                        <th>Salario Base</th>
+                        <th>Score 360° (MongoDB)</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>EMP-001</strong></td>
+                        <td>Carlos García López</td>
+                        <td>Tecnología</td>
+                        <td>Q 18,000.00</td>
+                        <td>94.5 / 100</td>
+                        <td><span class="badge-status badge-activo" data-atomic="atom">ACTIVO</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>EMP-002</strong></td>
+                        <td>María Martínez Ruiz</td>
+                        <td>Finanzas</td>
+                        <td>Q 15,000.00</td>
+                        <td>91.0 / 100</td>
+                        <td><span class="badge-status badge-activo" data-atomic="atom">ACTIVO</span></td>
+                      </tr>
+                      <tr>
+                        <td><strong>EMP-003</strong></td>
+                        <td>Sol López</td>
+                        <td>Operaciones</td>
+                        <td>Q 25,000.00</td>
+                        <td>97.2 / 100</td>
+                        <td><span class="badge-status badge-activo" data-atomic="atom">ACTIVO</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <!-- SCREEN 2: EMPLEADOS / RECURSOS -->
+              <section id="screen-empleados" class="screen-view">
+                <div class="card-panel" data-atomic="organism">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div>
+                      <h3 style="font-size:16px;">Explorador Políglota de Recursos (Redis + MongoDB + PostgreSQL)</h3>
+                      <p style="font-size:12px; color:#475569;">Filtro instantáneo con política Cache-Aside (TTL = 300 segundos)</p>
+                    </div>
+                    <button class="btn-primary" data-atomic="atom" onclick="showScreenById('nuevo')">+ Registrar Recurso</button>
+                  </div>
+                  <div class="form-grid" style="margin-bottom:14px;">
+                    <div class="form-group" data-atomic="molecule">
+                      <label for="f-depto">Filtrar por Departamento</label>
+                      <select id="f-depto"><option>Todos los Departamentos</option><option>Tecnología</option><option>Finanzas</option><option>Operaciones</option></select>
+                    </div>
+                    <div class="form-group" data-atomic="molecule">
+                      <label for="f-estado">Estado Operativo</label>
+                      <select id="f-estado"><option>ACTIVO</option><option>SUSPENDIDO</option><option>INACTIVO</option></select>
+                    </div>
+                  </div>
+                  <table class="erp-table">
+                    <thead>
+                      <tr><th>Código</th><th>Nombre Completo</th><th>DPI</th><th>Puesto</th><th>Jefe Inmediato (Grafo)</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>EMP-001</td><td>Carlos García López</td><td>2450198270101</td><td>Desarrollador Senior</td><td>Sol López</td><td><span class="badge-status badge-activo">ACTIVO</span></td></tr>
+                      <tr><td>EMP-002</td><td>María Martínez Ruiz</td><td>2918273640101</td><td>Analista Contable</td><td>Juan Ramírez</td><td><span class="badge-status badge-activo">ACTIVO</span></td></tr>
+                      <tr><td>EMP-004</td><td>Ana López Torres</td><td>3109283740101</td><td>Diseñadora UX/UI</td><td>Sol López</td><td><span class="badge-status badge-activo">ACTIVO</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <!-- SCREEN 3: NUEVO COLABORADOR -->
+              <section id="screen-nuevo" class="screen-view">
+                <div class="card-panel" data-atomic="organism">
+                  <h3 style="font-size:16px; color:#0f172a;">Registro de Nuevo Colaborador / Recurso Corporativo</h3>
+                  <p style="font-size:12px; color:#475569; margin-bottom:14px;">Endpoint: <code>POST /api/v1/recursos</code> &bull; Validación Zod + Errores Estandarizados RFC 9457 (<code>application/problem+json</code>)</p>
+                  <div class="form-grid">
+                    <div class="form-group" data-atomic="molecule">
+                      <label>Nombres *</label>
+                      <input type="text" value="Elena Sofía" />
+                    </div>
+                    <div class="form-group" data-atomic="molecule">
+                      <label>Apellidos *</label>
+                      <input type="text" value="Méndez Castillo" />
+                    </div>
+                    <div class="form-group" data-atomic="molecule">
+                      <label>Documento DPI (13 dígitos) *</label>
+                      <input type="text" value="2540198270101" />
+                    </div>
+                    <div class="form-group" data-atomic="molecule">
+                      <label>Salario Base Mensual (&ge; Q 3,384.59) *</label>
+                      <input type="number" value="18500.00" />
+                    </div>
+                    <div class="form-group" data-atomic="molecule">
+                      <label>Departamento *</label>
+                      <select><option>Tecnología</option><option>Finanzas</option><option>Operaciones</option></select>
+                    </div>
+                    <div class="form-group" data-atomic="molecule">
+                      <label>Régimen Laboral (Patrón Strategy) *</label>
+                      <select><option>ASALARIADO (IGSS 4.83% + Bono Q250)</option><option>SERVICIOS_PROFESIONALES (ISR 5%)</option><option>EJECUTIVO</option></select>
+                    </div>
+                  </div>
+                  <div style="margin-top:18px; display:flex; gap:10px;">
+                    <button class="btn-primary" data-atomic="atom" onclick="alert('HTTP 201 Created: Colaborador persistido en PostgreSQL, nodo creado en Neo4j, expediente en MongoDB y caché invalidada en Redis.')">💾 Guardar Colaborador (POST /api/v1/recursos)</button>
+                    <button class="btn-outline" data-atomic="atom" onclick="showScreenById('dashboard')">Cancelar</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- SCREEN 4: NOMINA -->
+              <section id="screen-nomina" class="screen-view">
+                <div class="card-panel" data-atomic="organism">
+                  <h3 style="font-size:16px;">Liquidación de Planilla Mensual (Patrón Strategy GoF)</h3>
+                  <p style="font-size:12px; color:#475569;">Cálculo automático de IGSS Laboral (4.83%), Bonificación Decreto 37-2001 (Q 250.00) e ISR</p>
+                  <table class="erp-table">
+                    <thead>
+                      <tr><th>Colaborador</th><th>Régimen</th><th>Salario Base</th><th>Bono Ley</th><th>IGSS (4.83%)</th><th>ISR</th><th>Salario Líquido</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Carlos García (EMP-001)</td><td>ASALARIADO</td><td>Q 18,000.00</td><td>Q 250.00</td><td>Q 869.40</td><td>Q 669.03</td><td><strong>Q 16,711.57</strong></td></tr>
+                      <tr><td>María Martínez (EMP-002)</td><td>ASALARIADO</td><td>Q 15,000.00</td><td>Q 250.00</td><td>Q 724.50</td><td>Q 526.28</td><td><strong>Q 13,999.22</strong></td></tr>
+                      <tr><td>Sol López (EMP-003)</td><td>EJECUTIVO</td><td>Q 25,000.00</td><td>Q 250.00</td><td>Q 1,207.50</td><td>Q 1,200.00</td><td><strong>Q 22,842.50</strong></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <!-- SCREEN 5: SOLICITUDES -->
+              <section id="screen-solicitudes" class="screen-view">
+                <div class="card-panel" data-atomic="organism">
+                  <h3 style="font-size:16px;">Gestión de Solicitudes de Ausencia y Vacaciones</h3>
+                  <p style="font-size:12px; color:#475569;">Control de saldo de días disponibles y flujo de aprobación por Jefe Inmediato</p>
+                  <table class="erp-table">
+                    <thead>
+                      <tr><th>Colaborador</th><th>Tipo</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Días</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Carlos García</td><td>VACACIONES</td><td>2026-11-01</td><td>2026-11-05</td><td>5 días</td><td><span class="badge-status badge-activo">APROBADA</span></td></tr>
+                      <tr><td>María Martínez</td><td>PERMISO MÉDICO</td><td>2026-10-24</td><td>2026-10-24</td><td>1 día</td><td><span class="badge-status badge-pendiente">PENDIENTE</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <!-- SCREEN 6: LOGIN -->
+              <section id="screen-login" class="screen-view">
+                <div class="card-panel" style="max-width:420px; margin:20px auto;" data-atomic="organism">
+                  <h3 style="font-size:17px; text-align:center; margin-bottom:6px;">Acceso Institucional ERP-RRHH</h3>
+                  <p style="font-size:12px; color:#475569; text-align:center; margin-bottom:16px;">Autenticación JWT (<code>POST /api/v1/auth/login</code>)</p>
+                  <div class="form-group" style="margin-bottom:12px;" data-atomic="molecule">
+                    <label>Correo Electrónico Institucional</label>
+                    <input type="email" value="admin.rrhh@empresa.com" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:16px;" data-atomic="molecule">
+                    <label>Contraseña</label>
+                    <input type="password" value="Password123!" />
+                  </div>
+                  <button class="btn-primary" style="width:100%;" data-atomic="atom" onclick="showScreenById('dashboard')">Iniciar Sesión con JWT</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function showScreen(screenKey, itemEl) {
+      document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + screenKey).classList.add('active');
+      document.querySelectorAll('.screen-item').forEach(i => i.classList.remove('active'));
+      if (itemEl) itemEl.classList.add('active');
+    }
+    function showScreenById(screenKey) {
+      showScreen(screenKey, null);
+    }
+    function setViewport(mode) {
+      const frame = document.getElementById('device-frame');
+      document.getElementById('btn-desktop').classList.toggle('active', mode === 'desktop');
+      document.getElementById('btn-mobile').classList.toggle('active', mode === 'mobile');
+      frame.classList.toggle('mobile-mode', mode === 'mobile');
+    }
+    function toggleAtomic() {
+      const frame = document.getElementById('device-frame');
+      const btn = document.getElementById('btn-atomic');
+      frame.classList.toggle('show-atomic');
+      btn.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

@@ -7,6 +7,7 @@
 ### 👥 Integrantes
 * **Paul Dominguez** — Carné: `9989-23-9308`
 * **Jorge Morataya** — Carné: `9989-23-340`
+* **Britany Yamileth Meza Chinchilla** — Carné: `9989-23-3181`
 
 ---
 
@@ -16,7 +17,7 @@
 |---|---|---|
 | **📄 Informe Consolidado de Proyecto Final (PDF)** | [`informe/informe_proyecto_final.pdf`](file:///informe/informe_proyecto_final.pdf) / [`docs/Informe_Proyecto_Final_GrupoXX.pdf`](file:///docs/Informe_Proyecto_Final_GrupoXX.pdf) | Compendio General (Secciones 1 a 9) |
 | **📋 Tablero Ágil Activo (GitHub Projects / Jira)** | [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1) | Scrum / Kanban, 3C, INVEST, DoR/DoD |
-| **🎨 Prototipo Interactivo Navegable (Figma)** | [https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype](https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype) | ISO 9241-210, WCAG 2.2 AA, Atomic Design |
+| **🎨 Prototipo Interactivo Navegable (Web / Figma Viewer)** | [Abrir Prototipo Interactivo Navegable Online](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html) · Local: [`docs/ui/prototipo_interactivo.html`](file:///docs/ui/prototipo_interactivo.html) | ISO 9241-210, WCAG 2.2 AA, Atomic Design |
 
 ---
 

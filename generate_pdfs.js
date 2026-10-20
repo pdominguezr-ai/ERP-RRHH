@@ -90,7 +90,7 @@ function renderCoverPage({ title, subtitle, standard, docCode }) {
           <table>
             <tr><td><strong>Proyecto:</strong> Sistema ERP de Gestión de Recursos Humanos (ERP-RRHH)</td></tr>
             <tr><td><strong>Código de Artefacto:</strong> ${docCode}</td></tr>
-            <tr><td><strong>Integrantes:</strong> Paul Dominguez (9989-23-9308) &bull; Jorge Morataya (9989-23-340)</td></tr>
+            <tr><td><strong>Integrantes:</strong> Paul Dominguez (9989-23-9308) &bull; Jorge Morataya (9989-23-340) &bull; Britany Yamileth Meza Chinchilla (9989-23-3181)</td></tr>
             <tr><td><strong>Docente:</strong> Cátedra de Análisis de Sistemas II</td></tr>
             <tr><td><strong>Fecha de Entrega:</strong> Octubre 2026</td></tr>
           </table>
@@ -518,7 +518,7 @@ function buildEscenariosIso25010Html(imgs) {
 // ============================================================================
 // PDF 4: REPORTE UX/UI BAJO ISO 9241 & WCAG 2.2 (docs/ui/reporte_ux_ui.pdf)
 // ============================================================================
-function buildReporteUxUiHtml() {
+function buildReporteUxUiHtml(imgs) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>${commonStyle}</style></head><body>
     ${renderCoverPage({
       title: 'REPORTE DE DISEÑO UX/UI, USABILIDAD, ACCESIBILIDAD WCAG 2.2 Y ATOMIC DESIGN',
@@ -527,11 +527,15 @@ function buildReporteUxUiHtml() {
       docCode: 'UXUI-ISO9241-WCAG22-v2.0',
     })}
     <div class="page">
-      <h1 class="section-title">1. Prototipo Interactivo Navegable en Figma y Diseño Centrado en el Usuario (ISO 9241-210)</h1>
+      <h1 class="section-title">1. Prototipo Interactivo Navegable (Figma / Web Viewer) y Diseño Centrado en el Usuario (ISO 9241-210)</h1>
       <div class="link-box">
-        🎨 <strong>Enlace Oficial al Prototipo Interactivo Navegable en Figma:</strong><br/>
-        <a href="https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype" target="_blank">https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype</a>
+        🎨 <strong>Enlace Directo al Prototipo Interactivo Navegable Online (Sin 404):</strong><br/>
+        <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html" target="_blank">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
+        🌐 <strong>Catálogo de Componentes UI en Figma Community (HRMS ERP):</strong><br/>
+        <a href="https://www.figma.com/community/search?resource_type=mixed&sort_by=relevancy&query=HR%20Management%20Dashboard" target="_blank">https://www.figma.com/community/search?resource_type=mixed&amp;sort_by=relevancy&amp;query=HR%20Management%20Dashboard</a><br/>
+        📂 <strong>Archivo Ejecutable en Repositorio:</strong> <code>docs/ui/prototipo_interactivo.html</code>
       </div>
+      ${imgs && imgs.prototipoPreview ? `<div class="img-container"><img src="${imgs.prototipoPreview}" alt="Vista previa del Prototipo Interactivo Navegable" style="max-height:280px;" /><div class="img-caption">Figura 1.1: Vista del Prototipo Interactivo Navegable con selector Desktop (1440px) / Mobile-First (375px) e Inspector Atomic Design</div></div>` : ''}
       <p>Siguiendo el proceso iterativo del estándar <strong>ISO 9241-210 (Ergonomics of human-system interaction — Human-centred design for interactive systems)</strong>, se modelaron los flujos de usuario a partir del contexto real de operación de un departamento de Recursos Humanos en Guatemala.</p>
 
       <h2 class="subsection-title">1.1 Customer Journey Map (Mapa de Experiencia del Usuario)</h2>
@@ -1099,7 +1103,7 @@ function buildInformeProyectoFinalConsolidadoHtml(imgs) {
           <table>
             <tr><td><strong>Universidad:</strong> Universidad Mariano Gálvez de Guatemala</td></tr>
             <tr><td><strong>Curso:</strong> Análisis de Sistemas II</td></tr>
-            <tr><td><strong>Integrantes:</strong> Paul Dominguez (9989-23-9308) &bull; Jorge Morataya (9989-23-340)</td></tr>
+            <tr><td><strong>Integrantes:</strong> Paul Dominguez (9989-23-9308) &bull; Jorge Morataya (9989-23-340) &bull; Britany Yamileth Meza Chinchilla (9989-23-3181)</td></tr>
             <tr><td><strong>Docente:</strong> Cátedra de Análisis de Sistemas II</td></tr>
             <tr><td><strong>Fecha:</strong> Octubre 2026</td></tr>
           </table>
@@ -1136,7 +1140,8 @@ function buildInformeProyectoFinalConsolidadoHtml(imgs) {
       <div class="link-box">
         🔗 <strong>Enlaces Directos del Ecosistema del Proyecto:</strong><br/>
         &bull; <strong>Tablero Ágil (GitHub Projects / Jira):</strong> <a href="https://github.com/users/pdominguezr-ai/projects/1/views/1">https://github.com/users/pdominguezr-ai/projects/1/views/1</a><br/>
-        &bull; <strong>Prototipo Interactivo Navegable (Figma):</strong> <a href="https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype">https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype</a><br/>
+        &bull; <strong>Prototipo Interactivo Navegable Online (Figma Viewer):</strong> <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
+        &bull; <strong>Figma Community HRMS Design System:</strong> <a href="https://www.figma.com/community/search?resource_type=mixed&sort_by=relevancy&query=HR%20Management%20Dashboard">https://www.figma.com/community/search?resource_type=mixed&amp;sort_by=relevancy&amp;query=HR%20Management%20Dashboard</a><br/>
         &bull; <strong>Documentación de Requerimientos y UML:</strong> <code>docs/requirements/</code> y <code>docs/uml/</code><br/>
         &bull; <strong>Documentación Arquitectónica, C4 y Base de Datos:</strong> <code>docs/architecture/adrs/</code>, <code>docs/c4/</code> y <code>docs/database/</code>
       </div>
@@ -1323,8 +1328,9 @@ function buildInformeProyectoFinalConsolidadoHtml(imgs) {
       <h1 class="section-title">5. EXPERIENCIA DE USUARIO (UX/UI) Y MOBILE-FIRST (PASOS 8 Y 9)</h1>
       <p>El diseño centrado en el usuario (<strong>ISO 9241-210</strong>) incluye Customer Journey Maps, evaluación heurística de los 10 principios de Jakob Nielsen (<strong>ISO 9241-11</strong>), cumplimiento estricto de <strong>WCAG 2.2 Nivel AA (Principios POUR: contraste 15.8:1, objetivos táctiles de 44x44px, navegación por teclado)</strong> y arquitectura visual <strong>Atomic Design</strong> (Átomos, Moléculas, Organismos, Plantillas y Páginas en <code>src/components/</code>). El reporte completo se encuentra en <code>docs/ui/reporte_ux_ui.pdf</code>.</p>
       <div class="link-box">
-        🎨 <strong>Vínculo al Prototipo Interactivo Navegable en Figma:</strong><br/>
-        <a href="https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype">https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype</a>
+        🎨 <strong>Vínculo al Prototipo Interactivo Navegable (Web / Figma Viewer):</strong><br/>
+        <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
+        🌐 <strong>Referencia en Figma Community:</strong> <a href="https://www.figma.com/community/search?resource_type=mixed&sort_by=relevancy&query=HR%20Management%20Dashboard">https://www.figma.com/community/search?resource_type=mixed&amp;sort_by=relevancy&amp;query=HR%20Management%20Dashboard</a>
       </div>
 
       <h1 class="section-title">6. ESTRATEGIA DE CALIDAD Y PLAN SQA (PASO 10)</h1>
@@ -1438,6 +1444,20 @@ async function renderHtmlToPdf(browser, htmlContent, outputPaths) {
 
 async function main() {
   const baseDir = __dirname;
+  const browser = await puppeteer.launch({ headless: 'new' });
+
+  // Render screenshot of interactive prototype first
+  const protoHtmlPath = path.join(baseDir, 'docs', 'ui', 'prototipo_interactivo.html');
+  const protoPngPath = path.join(baseDir, 'docs', 'ui', 'prototipo_preview.png');
+  if (fs.existsSync(protoHtmlPath)) {
+    fs.copyFileSync(protoHtmlPath, path.join(baseDir, 'public', 'prototipo.html'));
+    const pPage = await browser.newPage();
+    await pPage.setViewport({ width: 1360, height: 820 });
+    await pPage.setContent(fs.readFileSync(protoHtmlPath, 'utf8'), { waitUntil: 'load' });
+    await pPage.screenshot({ path: protoPngPath });
+    await pPage.close();
+  }
+
   const imgs = {
     umlClases: getBase64Image(path.join(baseDir, 'docs', 'uml', 'clases.png')),
     umlSecuencia: getBase64Image(path.join(baseDir, 'docs', 'uml', 'secuencia.png')),
@@ -1448,9 +1468,8 @@ async function main() {
     c4Nivel3: getBase64Image(path.join(baseDir, 'docs', 'c4', 'c4_nivel3_componentes.png')),
     c4Nivel4: getBase64Image(path.join(baseDir, 'docs', 'c4', 'c4_nivel4_codigo.png')),
     modeloPoliglota: getBase64Image(path.join(baseDir, 'docs', 'database', 'modelo_poliglota.png')),
+    prototipoPreview: getBase64Image(protoPngPath),
   };
-
-  const browser = await puppeteer.launch({ headless: 'new' });
 
   try {
     // 1. SRS ISO 29148
@@ -1469,7 +1488,7 @@ async function main() {
     ]);
 
     // 4. Reporte UX/UI ISO 9241 & WCAG 2.2
-    await renderHtmlToPdf(browser, buildReporteUxUiHtml(), [
+    await renderHtmlToPdf(browser, buildReporteUxUiHtml(imgs), [
       path.join(baseDir, 'docs', 'ui', 'reporte_ux_ui.pdf'),
       path.join(baseDir, 'docs', 'ui', 'reporte_usabilidad.pdf'),
     ]);

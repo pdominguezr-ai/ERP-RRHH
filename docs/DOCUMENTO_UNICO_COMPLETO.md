@@ -53,7 +53,7 @@ Para facilitar el control y la navegación del proyecto, a continuación se deta
 ## 2. ENLACES PRINCIPALES Y ACCESOS RÁPIDOS
 
 * 🌐 **Tablero Ágil Activo (GitHub Projects / Jira):** [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1)
-* 🎨 **Prototipo Interactivo UX/UI (Figma):** [https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype](https://www.figma.com/design/pdominguezr-ai/ERP-RRHH-Prototype)
+* 🎨 **Prototipo Interactivo UX/UI (Web / Figma Viewer):** [https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html)
 * 📄 **Especificaciones Gherkin (.feature):** [Carpeta features/](file:///features/)
 * 📐 **Contrato OpenAPI 3.0.3 (Swagger):** [docs/api/openapi.yaml](file:///docs/api/openapi.yaml)
 * 🧪 **Colección Postman Executable:** [test-api/coleccion_postman.json](file:///test-api/coleccion_postman.json)

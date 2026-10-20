@@ -4,7 +4,7 @@
 * **ID de Decisión:** ADR-001
 * **Estado:** Aceptada ( Vigente )
 * **Fecha:** Octubre 2026
-* **Autores:** Paul Dominguez (9989-23-9308), Jorge Morataya (9989-23-340)
+* **Autores:** Paul Dominguez (9989-23-9308), Jorge Morataya (9989-23-340), Britany Yamileth Meza Chinchilla (9989-23-3181)
 * **Stakeholders Preocupados (Concerns):** Dirección de TI, Administradores de RRHH, Equipo de Desarrollo y QA.
 
 ---
