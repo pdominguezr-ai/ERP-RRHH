@@ -1,7 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { getUserInfo } from '@/lib/auth';
+import { puedeAprobarSolicitudes } from '@/lib/permissions';
 import { createSolicitud as createDbSolicitud, updateSolicitudEstado } from '@/services/solicitudService';
 import type { SolicitudAusenciaFormData } from '@/types/solicitudAusencia';
 
@@ -17,23 +18,13 @@ export async function createSolicitud(data: SolicitudAusenciaFormData) {
 
 export async function resolverSolicitud(id: string, estado: 'APROBADA' | 'RECHAZADA', observaciones?: string) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    let aprobado_por = undefined;
-    if (user) {
-      // Get internal user ID from auth user
-      const { data: userData } = await supabase
-        .from('usuarios_sistema')
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .single();
-        
-      if (userData) {
-        aprobado_por = userData.id;
-      }
+    const { id: usuarioId, rol } = await getUserInfo();
+
+    if (!puedeAprobarSolicitudes(rol)) {
+      return { success: false, error: 'No tienes permisos para aprobar o rechazar solicitudes.' };
     }
 
+    const aprobado_por = usuarioId || undefined;
     const result = await updateSolicitudEstado(id, estado, observaciones, aprobado_por);
     revalidatePath('/dashboard/solicitudes');
     return { success: true, data: result };

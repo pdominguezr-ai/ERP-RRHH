@@ -3,7 +3,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import EvaluacionForm from '../EvaluacionForm';
 
 export default async function NuevaEvaluacionPage() {
-  await requireRole(['ADMIN_RRHH', 'JEFE_INMEDIATO', 'EMPLEADO']);
+  await requireRole(['ADMIN_RRHH', 'JEFE_INMEDIATO']);
 
   return (
     <div className="max-w-4xl mx-auto">

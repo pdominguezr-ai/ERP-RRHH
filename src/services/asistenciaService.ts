@@ -60,6 +60,8 @@ export async function getAsistencias() {
       .from('empleados')
       .select('id')
       .eq('usuario_id', usuarioId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (empErr) {

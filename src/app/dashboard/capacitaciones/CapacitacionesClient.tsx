@@ -9,9 +9,10 @@ import type { Capacitacion } from '@/types/capacitacion';
 
 interface CapacitacionesClientProps {
   initialData: Capacitacion[];
+  canManage?: boolean;
 }
 
-export default function CapacitacionesClient({ initialData }: CapacitacionesClientProps) {
+export default function CapacitacionesClient({ initialData, canManage = false }: CapacitacionesClientProps) {
   const columns: Column<Capacitacion>[] = [
     {
       key: 'nombre',
@@ -64,15 +65,17 @@ export default function CapacitacionesClient({ initialData }: CapacitacionesClie
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
-        <Link
-          href="/dashboard/capacitaciones/nuevo"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva Capacitación
-        </Link>
-      </div>
+      {canManage && (
+        <div className="mb-4 flex justify-end">
+          <Link
+            href="/dashboard/capacitaciones/nuevo"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Nueva Capacitación
+          </Link>
+        </div>
+      )}
 
       <DataTable
         data={initialData}

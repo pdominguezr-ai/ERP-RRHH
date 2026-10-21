@@ -9,9 +9,10 @@ import type { EvaluacionDesempeno } from '@/types/evaluacion';
 
 interface EvaluacionesClientProps {
   initialData: EvaluacionDesempeno[];
+  canCreate?: boolean;
 }
 
-export default function EvaluacionesClient({ initialData }: EvaluacionesClientProps) {
+export default function EvaluacionesClient({ initialData, canCreate = false }: EvaluacionesClientProps) {
   const columns: Column<EvaluacionDesempeno>[] = [
     {
       key: 'empleado',
@@ -51,15 +52,17 @@ export default function EvaluacionesClient({ initialData }: EvaluacionesClientPr
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
-        <Link
-          href="/dashboard/evaluaciones/nuevo"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva Evaluación
-        </Link>
-      </div>
+      {canCreate && (
+        <div className="mb-4 flex justify-end">
+          <Link
+            href="/dashboard/evaluaciones/nuevo"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Nueva Evaluación
+          </Link>
+        </div>
+      )}
 
       <DataTable
         data={initialData}

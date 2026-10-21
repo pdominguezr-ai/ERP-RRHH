@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabaseServer';
 
 export interface AdminDashboardMetrics {
   totalEmpleados: number;
@@ -250,13 +250,15 @@ export async function getReclutadorDashboardMetrics(): Promise<ReclutadorDashboa
 
 // 4. EMPLEADO Metrics
 export async function getEmpleadoDashboardMetrics(empleadoUsuarioId: string): Promise<EmpleadoDashboardMetrics> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
 
   // Encontrar el registro de empleado asociado a este usuario_id de sistema
   const { data: empleado } = await supabase
     .from('empleados')
     .select('id, codigo, nombres, apellidos, puesto, departamento, fecha_ingreso, salario_base')
     .eq('usuario_id', empleadoUsuarioId)
+    .order('updated_at', { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (!empleado) {

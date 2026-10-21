@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabaseServer';
+import { getUserInfo } from '@/lib/auth';
 import type { Beneficio, BeneficioFormData, EmpleadoBeneficio } from '@/types/beneficio';
 
 export async function getBeneficios() {
@@ -50,15 +51,37 @@ export async function updateBeneficio(id: string, data: Partial<BeneficioFormDat
 }
 
 export async function getAsignaciones() {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
+  const { id: usuarioId, rol } = await getUserInfo();
+  if (!usuarioId) {
+    return [];
+  }
+
+  const adminClient = createSupabaseAdminClient();
+  let query = adminClient
     .from('empleado_beneficios')
     .select(`
       *,
       empleado:empleados(nombres, apellidos, departamento),
       beneficio:beneficios(nombre, monto)
-    `)
-    .order('fecha_asignacion', { ascending: false });
+    `);
+
+  if (rol === 'EMPLEADO') {
+    const { data: empRecord } = await adminClient
+      .from('empleados')
+      .select('id')
+      .eq('usuario_id', usuarioId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!empRecord?.id) {
+      return [];
+    }
+
+    query = query.eq('empleado_id', empRecord.id);
+  }
+
+  const { data, error } = await query.order('fecha_asignacion', { ascending: false });
 
   if (error) {
     console.error('Error fetching asignaciones:', error);

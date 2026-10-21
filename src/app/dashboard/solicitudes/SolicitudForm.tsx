@@ -21,16 +21,23 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export default function SolicitudForm() {
+interface SolicitudFormProps {
+  empleadoFijo?: { id: string; nombres: string; apellidos: string } | null;
+}
+
+export default function SolicitudForm({ empleadoFijo = null }: SolicitudFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [misEmpleados, setMisEmpleados] = useState<{ value: string; label: string }[]>([]);
+  const [misEmpleados, setMisEmpleados] = useState<{ value: string; label: string }[]>(
+    empleadoFijo ? [{ value: empleadoFijo.id, label: `${empleadoFijo.nombres} ${empleadoFijo.apellidos}` }] : []
+  );
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
     defaultValues: {
+      empleado_id: empleadoFijo?.id || '',
       tipo: 'PERMISO',
       fecha_inicio: '',
       fecha_fin: '',
@@ -38,8 +45,11 @@ export default function SolicitudForm() {
     },
   });
 
-  // Para demostración: traemos todos los empleados activos (en el futuro se filtra según el rol/usuario)
   useEffect(() => {
+    if (empleadoFijo) {
+      setMisEmpleados([{ value: empleadoFijo.id, label: `${empleadoFijo.nombres} ${empleadoFijo.apellidos}` }]);
+      return;
+    }
     supabase.from('empleados')
       .select('id, nombres, apellidos')
       .eq('estado', 'ACTIVO')
@@ -48,7 +58,7 @@ export default function SolicitudForm() {
           setMisEmpleados(data.map(e => ({ value: e.id, label: `${e.nombres} ${e.apellidos}` })));
         }
       });
-  }, []);
+  }, [empleadoFijo]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);

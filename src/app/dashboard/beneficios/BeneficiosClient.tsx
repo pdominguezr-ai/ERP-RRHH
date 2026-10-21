@@ -11,9 +11,10 @@ import { Gift, Users } from 'lucide-react';
 interface BeneficiosClientProps {
   initialBeneficios: Beneficio[];
   initialAsignaciones: EmpleadoBeneficio[];
+  canManage?: boolean;
 }
 
-export default function BeneficiosClient({ initialBeneficios, initialAsignaciones }: BeneficiosClientProps) {
+export default function BeneficiosClient({ initialBeneficios, initialAsignaciones, canManage = false }: BeneficiosClientProps) {
   const [tab, setTab] = useState<'CATALOGO' | 'ASIGNACIONES'>('CATALOGO');
 
   const beneficioColumns: Column<Beneficio>[] = [
@@ -105,12 +106,12 @@ export default function BeneficiosClient({ initialBeneficios, initialAsignacione
             }`}
           >
             <Users className="w-4 h-4" />
-            Asignaciones
+            {canManage ? 'Asignaciones' : 'Mis Beneficios'}
           </button>
         </div>
 
         <div>
-          {tab === 'CATALOGO' && (
+          {canManage && tab === 'CATALOGO' && (
             <Link
               href="/dashboard/beneficios/nuevo"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-sm"

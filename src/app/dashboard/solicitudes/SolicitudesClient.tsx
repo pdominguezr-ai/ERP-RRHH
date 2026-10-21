@@ -11,9 +11,10 @@ import { resolverSolicitud } from './actions';
 
 interface SolicitudesClientProps {
   initialData: SolicitudAusencia[];
+  canApprove?: boolean;
 }
 
-export default function SolicitudesClient({ initialData }: SolicitudesClientProps) {
+export default function SolicitudesClient({ initialData, canApprove = false }: SolicitudesClientProps) {
   const [loadingAction, setLoadingAction] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [dialog, setDialog] = useState<{
@@ -100,11 +101,11 @@ export default function SolicitudesClient({ initialData }: SolicitudesClientProp
       header: 'Observaciones Resolutor',
       render: (row) => <span className="text-xs text-gray-500 max-w-[150px] truncate block" title={row.observaciones}>{row.observaciones || '—'}</span>,
     },
-    {
+    ...(canApprove ? [{
       key: 'acciones',
       header: 'Acciones',
       className: 'text-right',
-      render: (row) => (
+      render: (row: SolicitudAusencia) => (
         <div className="flex items-center justify-end gap-2">
           {row.estado === 'PENDIENTE' && (
             <>
@@ -126,7 +127,7 @@ export default function SolicitudesClient({ initialData }: SolicitudesClientProp
           )}
         </div>
       ),
-    },
+    }] : []),
   ];
 
   return (

@@ -1,15 +1,38 @@
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabaseServer';
+import { getUserInfo } from '@/lib/auth';
 import type { EvaluacionDesempeno, EvaluacionFormData } from '@/types/evaluacion';
 
 export async function getEvaluaciones() {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
+  const { id: usuarioId, rol } = await getUserInfo();
+  if (!usuarioId) {
+    return [];
+  }
+
+  const adminClient = createSupabaseAdminClient();
+  let query = adminClient
     .from('evaluaciones_desempeno')
     .select(`
       *,
       empleado:empleados(nombres, apellidos, codigo, departamento)
-    `)
-    .order('created_at', { ascending: false });
+    `);
+
+  if (rol === 'EMPLEADO') {
+    const { data: empRecord } = await adminClient
+      .from('empleados')
+      .select('id')
+      .eq('usuario_id', usuarioId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!empRecord?.id) {
+      return [];
+    }
+
+    query = query.eq('empleado_id', empRecord.id);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching evaluaciones:', error);

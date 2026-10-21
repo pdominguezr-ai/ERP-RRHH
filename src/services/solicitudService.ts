@@ -1,18 +1,58 @@
-import { createSupabaseServerClient } from '@/lib/supabaseServer';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabaseServer';
+import { getUserInfo } from '@/lib/auth';
 import type { SolicitudAusencia, SolicitudAusenciaFormData } from '@/types/solicitudAusencia';
 import { Validators } from '@/lib/validators';
 import { registrarAuditoria } from './auditoriaService';
 
 export async function getSolicitudes() {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
+  const { id: usuarioId, rol } = await getUserInfo();
+  if (!usuarioId) {
+    return [];
+  }
+
+  const adminClient = createSupabaseAdminClient();
+  let query = adminClient
     .from('solicitudes_ausencia')
     .select(`
       *,
       empleado:empleados(nombres, apellidos, codigo, departamento),
       aprobador:usuarios_sistema(correo)
-    `)
-    .order('created_at', { ascending: false });
+    `);
+
+  if (rol === 'EMPLEADO') {
+    const { data: empRecord } = await adminClient
+      .from('empleados')
+      .select('id')
+      .eq('usuario_id', usuarioId)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!empRecord?.id) {
+      return [];
+    }
+
+    query = query.eq('empleado_id', empRecord.id);
+  } else if (rol === 'JEFE_INMEDIATO') {
+    const { data: jefeRel } = await adminClient
+      .from('jefes_inmediatos')
+      .select('empleado_id')
+      .eq('usuario_id', usuarioId)
+      .maybeSingle();
+
+    const jefeEmpleadoId = jefeRel?.empleado_id;
+    if (jefeEmpleadoId) {
+      const { data: subordinates } = await adminClient
+        .from('empleados')
+        .select('id')
+        .eq('jefe_inmediato_id', jefeEmpleadoId);
+
+      const teamIds = [jefeEmpleadoId, ...(subordinates?.map(s => s.id) || [])];
+      query = query.in('empleado_id', teamIds);
+    }
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching solicitudes:', error);
