@@ -11,13 +11,23 @@
 
 ---
 
+## 📑 Documentos de Auditoría y Evaluación por Rúbrica (Entrega Final)
+
+| Documento de Entrega | Enlace Directo | Propósito / Alcance |
+|---|---|---|
+| **📊 Auditoría Exhaustiva de Rúbrica** | [`AUDITORIA_RUBRICA.md`](./AUDITORIA_RUBRICA.md) | Evaluación formal de los 6 criterios (10 puntos), estimación de 9.45/10, evidencias y matriz de subrequisitos. |
+| **🗺️ Mapa de Entrega y Guía de Defensa** | [`MAPA_ENTREGA_RUBRICA.md`](./MAPA_ENTREGA_RUBRICA.md) | Índice navegable para el docente, tabla de evidencias, índice de las 9 secciones del PDF y guía de defensa paso a paso. |
+| **📝 Registro de Pendientes de Entrega** | [`PENDIENTES_ENTREGA.md`](./PENDIENTES_ENTREGA.md) | Lista priorizada de verificaciones externas (visibilidad pública de GitHub Projects y enlace Figma). |
+
+---
+
 ## 🌐 Enlaces Rápidos a Plataformas Externas y Entregables Principales
 
 | Recurso / Plataforma | Enlace Directo / Ruta en Repositorio | Estándar Aplicado |
 |---|---|---|
-| **📄 Informe Consolidado de Proyecto Final (PDF)** | [`informe/informe_proyecto_final.pdf`](file:///informe/informe_proyecto_final.pdf) / [`docs/Informe_Proyecto_Final_GrupoXX.pdf`](file:///docs/Informe_Proyecto_Final_GrupoXX.pdf) | Compendio General (Secciones 1 a 9) |
+| **📄 Informe Consolidado de Proyecto Final (PDF)** | [`informe/informe_proyecto_final.pdf`](./informe/informe_proyecto_final.pdf) / [`docs/Informe_Proyecto_Final_GrupoXX.pdf`](./docs/Informe_Proyecto_Final_GrupoXX.pdf) | Compendio General (Secciones 1 a 9) |
 | **📋 Tablero Ágil Activo (GitHub Projects / Jira)** | [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1) | Scrum / Kanban, 3C, INVEST, DoR/DoD |
-| **🎨 Prototipo Interactivo Navegable (Web / Figma Viewer)** | [Abrir Prototipo Interactivo Navegable Online](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html) · Local: [`docs/ui/prototipo_interactivo.html`](file:///docs/ui/prototipo_interactivo.html) | ISO 9241-210, WCAG 2.2 AA, Atomic Design |
+| **🎨 Prototipo Interactivo Navegable (Web / Figma Viewer)** | [Abrir Prototipo Interactivo Navegable Online](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html) · Local: [`docs/ui/prototipo_interactivo.html`](./docs/ui/prototipo_interactivo.html) | ISO 9241-210, WCAG 2.2 AA, Atomic Design |
 
 ---
 
@@ -25,21 +35,21 @@
 
 | Componente | Artefacto / Elemento | Estándar Internacional Aplicado | Formato | Ubicación Exacta en Repositorio |
 |---|---|---|---|---|
-| **Comp. 1** | Especificación de Requerimientos (SRS) | **ISO/IEC/IEEE 29148:2018** | PDF | [`docs/requirements/srs_ieee_29148.pdf`](file:///docs/requirements/srs_ieee_29148.pdf) |
-| **Comp. 1** | Fichas de Diseño de Componentes (SDD) | **IEEE 1016-2009** | PDF | [`docs/requirements/fichas_diseno_ieee1016.pdf`](file:///docs/requirements/fichas_diseno_ieee1016.pdf) |
-| **Comp. 1** | Diagramación Visual UML (Clases, Secuencia, Actividades Swimlanes, Paquetes) | **UML 2.5.1 (OMG)** | `.puml` + `.png` | [`docs/uml/`](file:///docs/uml/) (`clases`, `secuencia`, `actividades`, `paquetes`) |
-| **Comp. 1** | Gestión Ágil (PO, 3C, INVEST, DoR/DoD) | **Scrum / Kanban / INVEST** | Markdown | [`docs/agile/backlog.md`](file:///docs/agile/backlog.md) |
-| **Comp. 2** | Evaluación Arquitectónica y Escenarios | **ISO/IEC 25010:2011** | PDF | [`docs/architecture/escenarios_iso25010.pdf`](file:///docs/architecture/escenarios_iso25010.pdf) |
-| **Comp. 2** | Registros de Decisiones de Arquitectura | **ISO/IEC/IEEE 42010:2011** | Markdown | [`docs/architecture/adrs/`](file:///docs/architecture/adrs/) (`ADR-001` a `ADR-004`) |
-| **Comp. 2** | Modelo C4 Completo (Niveles 1, 2, 3 y 4) | **Notación C4 (Simon Brown)** | `.puml` + `.png` | [`docs/c4/`](file:///docs/c4/) (`c4_nivel1..4.png` + `src/`) |
-| **Comp. 2** | Persistencia Políglota (PostgreSQL, MongoDB, Redis Cache-Aside TTL, Neo4j) | **Polyglot Persistence & Cache-Aside** | `.png` + `.sql` | [`docs/database/modelo_poliglota.png`](file:///docs/database/modelo_poliglota.png) y [`docs/database/scripts_ddl.sql`](file:///docs/database/scripts_ddl.sql) |
-| **Comp. 2** | Patrones de Diseño GoF y Resiliencia | **GoF (Strategy, Repository, Gateway, Observer, Circuit Breaker)** | TypeScript | [`src/services/gofPatterns.ts`](file:///src/services/gofPatterns.ts) y [`src/models/`](file:///src/models/) |
-| **Comp. 3** | Contrato API-First y Errores Unificados | **OpenAPI 3.0.3 / RFC 9110 / RFC 9457** | YAML + JSON | [`docs/api/openapi.yaml`](file:///docs/api/openapi.yaml) y [`docs/api/postman_collection.json`](file:///docs/api/postman_collection.json) |
-| **Comp. 3** | Especificación BDD y Pruebas de Aceptación | **ISO/IEC/IEEE 29119-3:2021** | `.feature` + PDF | [`features/`](file:///features/) y [`docs/qa/casos_prueba_ieee29119.pdf`](file:///docs/qa/casos_prueba_ieee29119.pdf) |
-| **Comp. 4** | Reporte de Diseño UX/UI, Heurísticas y Accesibilidad | **ISO 9241-210 / ISO 9241-11 / WCAG 2.2 AA** | PDF + Figma | [`docs/ui/reporte_ux_ui.pdf`](file:///docs/ui/reporte_ux_ui.pdf) |
-| **Comp. 4** | Plan de Aseguramiento de Calidad (SQA) | **IEEE 730-2014 (Shift-Left)** | PDF | [`docs/qa/plan_sqa_ieee730.pdf`](file:///docs/qa/plan_sqa_ieee730.pdf) |
-| **Comp. 4** | Gestión y Clasificación de Defectos | **IEEE 1044-2009** | PDF | [`docs/qa/reporte_defectos_ieee1044.pdf`](file:///docs/qa/reporte_defectos_ieee1044.pdf) |
-| **Comp. 4** | Matriz de Trazabilidad Integral | **RTM Bidireccional** | PDF | [`docs/qa/trazabilidad.pdf`](file:///docs/qa/trazabilidad.pdf) |
+| **Comp. 1** | Especificación de Requerimientos (SRS) | **ISO/IEC/IEEE 29148:2018** | PDF | [`docs/requirements/srs_ieee_29148.pdf`](./docs/requirements/srs_ieee_29148.pdf) |
+| **Comp. 1** | Fichas de Diseño de Componentes (SDD) | **IEEE 1016-2009** | PDF | [`docs/requirements/fichas_diseno_ieee1016.pdf`](./docs/requirements/fichas_diseno_ieee1016.pdf) |
+| **Comp. 1** | Diagramación Visual UML (Clases, Secuencia, Actividades Swimlanes, Paquetes) | **UML 2.5.1 (OMG)** | `.puml` + `.png` | [`docs/uml/`](./docs/uml/) (`clases`, `secuencia`, `actividades`, `paquetes`) |
+| **Comp. 1** | Gestión Ágil (PO, 3C, INVEST, DoR/DoD) | **Scrum / Kanban / INVEST** | Markdown | [`docs/agile/backlog.md`](./docs/agile/backlog.md) |
+| **Comp. 2** | Evaluación Arquitectónica y Escenarios | **ISO/IEC 25010:2011** | PDF | [`docs/architecture/escenarios_iso25010.pdf`](./docs/architecture/escenarios_iso25010.pdf) |
+| **Comp. 2** | Registros de Decisiones de Arquitectura | **ISO/IEC/IEEE 42010:2011** | Markdown | [`docs/architecture/adrs/`](./docs/architecture/adrs/) (`ADR-001` a `ADR-004`) |
+| **Comp. 2** | Modelo C4 Completo (Niveles 1, 2, 3 y 4) | **Notación C4 (Simon Brown)** | `.puml` + `.png` | [`docs/c4/`](./docs/c4/) (`c4_nivel1..4.png` + `src/`) |
+| **Comp. 2** | Persistencia Políglota (PostgreSQL, MongoDB, Redis Cache-Aside TTL, Neo4j) | **Polyglot Persistence & Cache-Aside** | `.png` + `.sql` | [`docs/database/modelo_poliglota.png`](./docs/database/modelo_poliglota.png) y [`docs/database/scripts_ddl.sql`](./docs/database/scripts_ddl.sql) |
+| **Comp. 2** | Patrones de Diseño GoF y Resiliencia | **GoF (Strategy, Repository, Gateway, Observer, Circuit Breaker)** | TypeScript | [`src/services/gofPatterns.ts`](./src/services/gofPatterns.ts) y [`src/models/`](./src/models/) |
+| **Comp. 3** | Contrato API-First y Errores Unificados | **OpenAPI 3.0.3 / RFC 9110 / RFC 9457** | YAML + JSON | [`docs/api/openapi.yaml`](./docs/api/openapi.yaml) y [`docs/api/postman_collection.json`](./docs/api/postman_collection.json) |
+| **Comp. 3** | Especificación BDD y Pruebas de Aceptación | **ISO/IEC/IEEE 29119-3:2021** | `.feature` + PDF | [`features/`](./features/) y [`docs/qa/casos_prueba_ieee29119.pdf`](./docs/qa/casos_prueba_ieee29119.pdf) |
+| **Comp. 4** | Reporte de Diseño UX/UI, Heurísticas y Accesibilidad | **ISO 9241-210 / ISO 9241-11 / WCAG 2.2 AA** | PDF + Figma | [`docs/ui/reporte_ux_ui.pdf`](./docs/ui/reporte_ux_ui.pdf) |
+| **Comp. 4** | Plan de Aseguramiento de Calidad (SQA) | **IEEE 730-2014 (Shift-Left)** | PDF | [`docs/qa/plan_sqa_ieee730.pdf`](./docs/qa/plan_sqa_ieee730.pdf) |
+| **Comp. 4** | Gestión y Clasificación de Defectos | **IEEE 1044-2009** | PDF | [`docs/qa/reporte_defectos_ieee1044.pdf`](./docs/qa/reporte_defectos_ieee1044.pdf) |
+| **Comp. 4** | Matriz de Trazabilidad Integral | **RTM Bidireccional** | PDF | [`docs/qa/trazabilidad.pdf`](./docs/qa/trazabilidad.pdf) |
 
 ---
 
