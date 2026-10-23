@@ -16,8 +16,8 @@
 | Recurso / Plataforma | Enlace Directo / Ruta en Repositorio | Estándar Aplicado |
 |---|---|---|
 | **📄 Informe Consolidado de Proyecto Final (PDF)** | [`informe/informe_proyecto_final.pdf`](file:///informe/informe_proyecto_final.pdf) / [`docs/Informe_Proyecto_Final_GrupoXX.pdf`](file:///docs/Informe_Proyecto_Final_GrupoXX.pdf) | Compendio General (Secciones 1 a 9) |
-| **📋 Tablero Ágil Activo (GitHub Projects / Jira)** | [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1) | Scrum / Kanban, 3C, INVEST, DoR/DoD |
-| **🎨 Prototipo Interactivo Navegable (Web / Figma Viewer)** | [Abrir Prototipo Interactivo Navegable Online](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html) · Local: [`docs/ui/prototipo_interactivo.html`](file:///docs/ui/prototipo_interactivo.html) | ISO 9241-210, WCAG 2.2 AA, Atomic Design |
+| **📋 Tablero Ágil Activo y Backlog** | [Ver Backlog y Tablero Ágil](https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md) · Local: [`docs/agile/backlog.md`](file:///docs/agile/backlog.md) | Scrum / Kanban, 3C, INVEST, DoR/DoD |
+| **🎨 Prototipo Oficial en Figma** | [Abrir Prototipo en Figma](https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1) · Visor Web: [Prototipo Online](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html) | ISO 9241-210, WCAG 2.2 AA, Atomic Design |
 
 ---
 

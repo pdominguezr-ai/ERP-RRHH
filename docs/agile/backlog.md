@@ -5,8 +5,8 @@
 
 ---
 
-## 🔗 Enlace Oficial al Tablero Ágil (GitHub Projects / Jira)
-> 🌐 **Tablero Kanban / Scrum Activo:** [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1)  
+## 🔗 Enlace Oficial al Tablero Ágil y Backlog
+> 🌐 **Tablero Kanban / Scrum Activo:** [https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md](https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md)  
 > *Contiene las columnas Backlog, Ready (DoR Cumplido), In Progress (WIP Limit = 3), Code Review / QA y Done (DoD Cumplido).*
 
 ---
@@ -30,7 +30,7 @@ Ninguna Historia de Usuario puede ingresar a un Sprint de desarrollo si no cumpl
 - [x] **DoR-01 (Estructura 3C Completa):** La historia posee su Tarjeta (*Card*) en sintaxis `Como <rol>, quiero <acción>, para <beneficio>`, notas de *Conversation* (reglas de negocio e impactos en persistencia políglota) y *Confirmation* (escenarios Gherkin).
 - [x] **DoR-02 (Validación INVEST):** La historia ha sido evaluada y aprobada en los 6 criterios: *Independent, Negotiable, Valuable, Estimable, Small (≤ 8 Story Points), Testable*.
 - [x] **DoR-03 (Contrato API-First Definido):** Los endpoints afectados están documentados previamente en `docs/api/openapi.yaml` con sus esquemas de entrada/salida y errores bajo **RFC 9457 (`application/problem+json`)**.
-- [x] **DoR-04 (Diseño UX/UI Disponible):** Los wireframes o componentes visuales (Átomos, Moléculas, Organismos) están disponibles en el prototipo navegable de Figma con criterios WCAG 2.2 AA.
+- [x] **DoR-04 (Diseño UX/UI Disponible):** Los wireframes o componentes visuales (Átomos, Moléculas, Organismos) están disponibles en el prototipo oficial de Figma ([Figma HRMS ERP](https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1)) con criterios WCAG 2.2 AA.
 - [x] **DoR-05 (Trazabilidad ISO 29148):** La historia está vinculada formalmente a su requerimiento funcional (`REQ-FN-XXX`) y no funcional (`REQ-NF-XXX`).
 
 ### 2.2 Criterios de Terminación — Definition of Done (DoD)

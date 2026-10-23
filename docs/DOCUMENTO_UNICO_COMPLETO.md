@@ -52,7 +52,8 @@ Para facilitar el control y la navegación del proyecto, a continuación se deta
 
 ## 2. ENLACES PRINCIPALES Y ACCESOS RÁPIDOS
 
-* 🌐 **Tablero Ágil Activo (GitHub Projects / Jira):** [https://github.com/users/pdominguezr-ai/projects/1/views/1](https://github.com/users/pdominguezr-ai/projects/1/views/1)
+* 🌐 **Tablero Ágil Activo y Backlog:** [https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md](https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md)
+* 🎨 **Prototipo Oficial en Figma:** [https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1](https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1)
 * 🎨 **Prototipo Interactivo UX/UI (Web / Figma Viewer):** [https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html)
 * 📄 **Especificaciones Gherkin (.feature):** [Carpeta features/](file:///features/)
 * 📐 **Contrato OpenAPI 3.0.3 (Swagger):** [docs/api/openapi.yaml](file:///docs/api/openapi.yaml)

@@ -6,7 +6,8 @@
 
 ## 🎨 1. Prototipo Interactivo Navegable en Figma
 > **Enlace Directo al Prototipo Interactivo:**  
-> 🌐 [Abrir Prototipo Navegable UX/UI Interactivo - ERP RRHH](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html)  
+> 🎨 **Figma Oficial:** [Human Resources Management System en Figma](https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1)  
+> 🌐 **Visor Web Online:** [Abrir Prototipo Navegable UX/UI Interactivo - ERP RRHH](https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html)  
 > *Incluye flujo de autenticación, gestión de empleados, procesamiento de nómina, solicitudes de ausencia y diseño adaptable responsive.*
 
 ---

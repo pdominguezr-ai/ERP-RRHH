@@ -529,10 +529,10 @@ function buildReporteUxUiHtml(imgs) {
     <div class="page">
       <h1 class="section-title">1. Prototipo Interactivo Navegable (Figma / Web Viewer) y Diseño Centrado en el Usuario (ISO 9241-210)</h1>
       <div class="link-box">
-        🎨 <strong>Enlace Directo al Prototipo Interactivo Navegable Online (Sin 404):</strong><br/>
+        🎨 <strong>Enlace Oficial al Prototipo en Figma:</strong><br/>
+        <a href="https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1" target="_blank">https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&amp;fullscreen=1</a><br/>
+        🌐 <strong>Visor Web Interactivo Navegable Online:</strong><br/>
         <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html" target="_blank">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
-        🌐 <strong>Catálogo de Componentes UI en Figma Community (HRMS ERP):</strong><br/>
-        <a href="https://www.figma.com/community/search?resource_type=mixed&sort_by=relevancy&query=HR%20Management%20Dashboard" target="_blank">https://www.figma.com/community/search?resource_type=mixed&amp;sort_by=relevancy&amp;query=HR%20Management%20Dashboard</a><br/>
         📂 <strong>Archivo Ejecutable en Repositorio:</strong> <code>docs/ui/prototipo_interactivo.html</code>
       </div>
       ${imgs && imgs.prototipoPreview ? `<div class="img-container"><img src="${imgs.prototipoPreview}" alt="Vista previa del Prototipo Interactivo Navegable" style="max-height:280px;" /><div class="img-caption">Figura 1.1: Vista del Prototipo Interactivo Navegable con selector Desktop (1440px) / Mobile-First (375px) e Inspector Atomic Design</div></div>` : ''}
@@ -1139,9 +1139,9 @@ function buildInformeProyectoFinalConsolidadoHtml(imgs) {
 
       <div class="link-box">
         🔗 <strong>Enlaces Directos del Ecosistema del Proyecto:</strong><br/>
-        &bull; <strong>Tablero Ágil (GitHub Projects / Jira):</strong> <a href="https://github.com/users/pdominguezr-ai/projects/1/views/1">https://github.com/users/pdominguezr-ai/projects/1/views/1</a><br/>
-        &bull; <strong>Prototipo Interactivo Navegable Online (Figma Viewer):</strong> <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
-        &bull; <strong>Figma Community HRMS Design System:</strong> <a href="https://www.figma.com/community/search?resource_type=mixed&sort_by=relevancy&query=HR%20Management%20Dashboard">https://www.figma.com/community/search?resource_type=mixed&amp;sort_by=relevancy&amp;query=HR%20Management%20Dashboard</a><br/>
+        &bull; <strong>Tablero Ágil Activo y Backlog:</strong> <a href="https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md">https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/agile/backlog.md</a><br/>
+        &bull; <strong>Prototipo Oficial en Figma:</strong> <a href="https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&amp;fullscreen=1">https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&amp;fullscreen=1</a><br/>
+        &bull; <strong>Visor Web del Prototipo Navegable Online:</strong> <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
         &bull; <strong>Documentación de Requerimientos y UML:</strong> <code>docs/requirements/</code> y <code>docs/uml/</code><br/>
         &bull; <strong>Documentación Arquitectónica, C4 y Base de Datos:</strong> <code>docs/architecture/adrs/</code>, <code>docs/c4/</code> y <code>docs/database/</code>
       </div>
@@ -1328,9 +1328,10 @@ function buildInformeProyectoFinalConsolidadoHtml(imgs) {
       <h1 class="section-title">5. EXPERIENCIA DE USUARIO (UX/UI) Y MOBILE-FIRST (PASOS 8 Y 9)</h1>
       <p>El diseño centrado en el usuario (<strong>ISO 9241-210</strong>) incluye Customer Journey Maps, evaluación heurística de los 10 principios de Jakob Nielsen (<strong>ISO 9241-11</strong>), cumplimiento estricto de <strong>WCAG 2.2 Nivel AA (Principios POUR: contraste 15.8:1, objetivos táctiles de 44x44px, navegación por teclado)</strong> y arquitectura visual <strong>Atomic Design</strong> (Átomos, Moléculas, Organismos, Plantillas y Páginas en <code>src/components/</code>). El reporte completo se encuentra en <code>docs/ui/reporte_ux_ui.pdf</code>.</p>
       <div class="link-box">
-        🎨 <strong>Vínculo al Prototipo Interactivo Navegable (Web / Figma Viewer):</strong><br/>
-        <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a><br/>
-        🌐 <strong>Referencia en Figma Community:</strong> <a href="https://www.figma.com/community/search?resource_type=mixed&sort_by=relevancy&query=HR%20Management%20Dashboard">https://www.figma.com/community/search?resource_type=mixed&amp;sort_by=relevancy&amp;query=HR%20Management%20Dashboard</a>
+        🎨 <strong>Prototipo Oficial en Figma:</strong><br/>
+        <a href="https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&fullscreen=1" target="_blank">https://www.figma.com/make/dbSlmGmQJzLC0LSi6jni60/Human-Resources-Management-System?t=nRmbossPJY7vnrj0-20&amp;fullscreen=1</a><br/>
+        🌐 <strong>Vínculo al Prototipo Interactivo Navegable (Web Viewer):</strong><br/>
+        <a href="https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html">https://htmlpreview.github.io/?https://github.com/pdominguezr-ai/ERP-RRHH/blob/main/docs/ui/prototipo_interactivo.html</a>
       </div>
 
       <h1 class="section-title">6. ESTRATEGIA DE CALIDAD Y PLAN SQA (PASO 10)</h1>
